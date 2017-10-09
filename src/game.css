@@ -1,0 +1,17 @@
+canvas {
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  width: 900px;
+  height: 900px;
+  background-color: 'black';
+}
+
+#ui {
+  position: absolute;
+  background-color: red;
+  left: 20px;
+  top: 920px;
+  width: 900px;
+  height: 200px;
+}
