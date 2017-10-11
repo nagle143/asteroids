@@ -1,11 +1,15 @@
 
 import Ship from './ship.js';
-import Asteroid from './asteriod.js';
+import Asteroid from './asteroid.js';
 
-export default class Game() {
+export default class Game {
   constructor() {
-
-
+    //Num Objects
+    this.numAsteroids = 10;
+    //Objects/Arrays
+    this.ship = new Ship();
+    //this.asteroids = [];
+    //this.createAsteroids();
 
     //HUD
     /*
@@ -35,11 +39,25 @@ export default class Game() {
 
     this.interval = setInterval(this.loop, 10);
   }
-  update() {
+
+  createAsteroids() {
+    while(this.asteroids.length < this.numAsteroids) {
+      this.addAsteroid();
+    }
+  }
+
+  addAsteroid() {
 
   }
+
+  update() {
+    this.ship.update();
+  }
   render() {
-    
+    this.backBufferContext.fillStyle = 'black';
+    this.backBufferContext.fillRect(0,0, 1000, 1000);
+    this.ship.render(this.backBufferContext);
+    this.screenBufferContext.drawImage(this.backBufferCanvas, 0, 0);
   }
   loop() {
     this.update();

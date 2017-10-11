@@ -1,18 +1,19 @@
 
 
 export default class Asteroid {
-  constructor(x, y, radius, id, exploded) {
+  constructor(x, y, radius, mass, id, exploded) {
     this.x = x;
     this.y = y;
     this.radius = radius;
+    this.mass = mass;
     this.ID = id;
     this.exploded = exploded;
     this.velocity = {x: 0.0, y: 0.0};
     if(exploded) {
-      explodedVelocity();
+      //explodedVelocity();
     }
     else {
-      initVelocity();
+      //initVelocity();
     }
     //Binders
   }
@@ -33,7 +34,7 @@ export default class Asteroid {
   }
 
   explodedVelocity() {
-  
+
   }
 
     /** @function collisionDetection()
