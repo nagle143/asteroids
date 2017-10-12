@@ -1,4 +1,5 @@
-
+import Projectile from './projectile.js';
+import Particle from './particles.js';
 
 export default class Ship {
   constructor() {
@@ -7,8 +8,14 @@ export default class Ship {
     //Velocity to determine the magnitude/direction of the ship
     this.velocity = {mag: 0.0, dir: 0.0};
     this.speed = {x: 0.0, y: 0.0};
+    //Projectile Array
+    this.projectiles = [];
+    this.rateOfFire = 30;
+    //particles
+    this.particles = [];
+
     //Input Map
-    this.keyMap = {32: false, 65: false, 68: false, 87: false};
+    this.keyMap = {32: false, 65: false, 68: false, 87: false, 88: false};
 
     //Binders
     this.update = this.update.bind(this);
@@ -16,6 +23,8 @@ export default class Ship {
     this.updateSpeed = this.updateSpeed.bind(this);
     this.handleKeyDown = this.handleKeyDown.bind(this);
     this.handleKeyUp = this.handleKeyUp.bind(this);
+    this.createProjectile = this.createProjectile.bind(this);
+    this.controlRateOfFire = this.controlRateOfFire.bind(this);
     window.onkeydown = this.handleKeyDown;
     window.onkeyup = this.handleKeyUp;
   }
@@ -66,6 +75,32 @@ export default class Ship {
     }
   }
 
+  createProjectile() {
+    //15 is the length from center to the top pointd
+    var x = this.position.x + Math.sin(this.velocity.dir)* 15;
+    var y = this.position.y - Math.cos(this.velocity.dir)* 15;
+    this.projectiles.push(new Projectile(x, y, this.velocity.dir));
+  }
+
+  createParticles(numParticles) {
+    var x = this.position.x - Math.sin(this.velocity.dir)* 15;
+    var y = this.position.y + Math.cos(this.velocity.dir)* 15;
+    for(var i = 0; i < numParticles; i++) {
+      this.particles.push(new Particle(x, y, Math.PI * this.velocity.dir));
+    }
+  }
+
+  controlRateOfFire() {
+    while(this.rateOfFire > 0) {
+      this.rateOfFire--;
+    }
+    this.rateOfFire = 30;
+  }
+
+  random(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+
   update() {
     this.edgeDetection();
     if(this.keyMap[65]){
@@ -83,12 +118,30 @@ export default class Ship {
     if(this.keyMap[87]) {
       this.velocity.mag = 0.1;
       this.updateSpeed();
+      var numParticles = Math.floor(this.random(2, 6));
+      this.createParticles(numParticles);
     }
-    if(this.keyMap[32]) {
-
+    if(this.keyMap[32] && this.rateOfFire === 30) {
+      this.createProjectile();
+      this.controlRateOfFire();
+    }
+    if(this.keyMap[88]) {
+      console.log(this.projectiles);
     }
     this.position.x += this.speed.x;
     this.position.y += this.speed.y;
+    for(var i = 0; i < this.projectiles.length; i++) {
+      this.projectiles[i].update();
+      if(this.projectiles[i].edgeDetection()) {
+        this.projectiles.splice(i, 1);
+      }
+    }
+    for(var j = 0; j < this.particles.length; j++) {
+      this.particles[j].update();
+      if(this.particles[j].life <= 0) {
+        this.particles.splice(j, 1);
+      }
+    }
   }
 
   render(ctx) {
@@ -104,5 +157,11 @@ export default class Ship {
     //ctx.closePath();
     ctx.stroke();
     ctx.restore();
+    this.projectiles.forEach(projectile => {
+      projectile.render(ctx);
+    });
+    this.particles.forEach(particle => {
+      particle.render(ctx);
+    });
   }
 }
