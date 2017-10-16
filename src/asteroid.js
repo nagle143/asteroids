@@ -28,10 +28,10 @@ export default class Asteroid {
   }
 
     /** @function collisionDetection()
-    * function to hadle particle on particle violence
-    * @param float ax is the x position of the circle being checked against this
-    * @param float ay is the y position of the circle being checked against this
-    * @param int aradius is the radius of the circle being checked against this
+    * function to handle asteroid on asteroid violence
+    * @param float ax is the x position of the asteroid being checked against this
+    * @param float ay is the y position of the asteroid being checked against this
+    * @param int aradius is the radius of the asteroid being checked against this
     */
   collisionDetection(ax, ay, aradius) {
     var distance = Math.pow(this.x - ax, 2) + Math.pow(this.y - ay, 2);
@@ -42,7 +42,7 @@ export default class Asteroid {
   }
 
   /** @function edgeDetection()
-    * function to handle the particle leaving the edge of the screen
+    * function to handle the asteroid leaving the edge of the screen
     */
   edgeDetection() {
     if(this.x >= 1000 + 2.5 * this.radius) {

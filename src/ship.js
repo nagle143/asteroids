@@ -1,4 +1,3 @@
-import Projectile from './projectile.js';
 import Particle from './particles.js';
 
 export default class Ship {
@@ -8,35 +7,13 @@ export default class Ship {
     //Velocity to determine the magnitude/direction of the ship
     this.velocity = {mag: 0.0, dir: 0.0};
     this.speed = {x: 0.0, y: 0.0};
-    //Projectile Array
-    this.projectiles = [];
-    this.rateOfFire = 40;
-    this.reloading = false;
     //particles
     this.particles = [];
-
-    //Input Map
-    this.keyMap = {32: false, 65: false, 68: false, 87: false, 88: false};
 
     //Binders
     this.update = this.update.bind(this);
     this.render = this.render.bind(this);
     this.updateSpeed = this.updateSpeed.bind(this);
-    this.handleKeyDown = this.handleKeyDown.bind(this);
-    this.handleKeyUp = this.handleKeyUp.bind(this);
-    this.createProjectile = this.createProjectile.bind(this);
-    window.onkeydown = this.handleKeyDown;
-    window.onkeyup = this.handleKeyUp;
-  }
-
-  handleKeyDown(event) {
-    event.preventDefault();
-    this.keyMap[event.keyCode] = true;
-  }
-
-  handleKeyUp(event) {
-    event.preventDefault();
-    this.keyMap[event.keyCode] = false;
   }
 
   updateSpeed() {
@@ -75,13 +52,6 @@ export default class Ship {
     }
   }
 
-  createProjectile() {
-    //15 is the length from center to the top pointd
-    var x = this.position.x + Math.sin(this.velocity.dir)* 15;
-    var y = this.position.y - Math.cos(this.velocity.dir)* 15;
-    this.projectiles.push(new Projectile(x, y, this.velocity.dir));
-  }
-
   createParticles(numParticles) {
     var x = this.position.x - Math.sin(this.velocity.dir)* 15;
     var y = this.position.y + Math.cos(this.velocity.dir)* 15;
@@ -96,46 +66,10 @@ export default class Ship {
 
   update() {
     this.edgeDetection();
-    if(this.keyMap[65]){
-      this.velocity.dir -= 0.05;
-      if(this.velocity.dir <= -Math.PI * 2) {
-        this.velocity.dir = 0.0;
-      }
-    }
-    if(this.keyMap[68]) {
-      this.velocity.dir += 0.05;
-      if(this.velocity.dir >= Math.PI * 2) {
-        this.velocity.dir = 0.0;
-      }
-    }
-    if(this.keyMap[87]) {
-      this.velocity.mag = 0.1;
-      this.updateSpeed();
-      var numParticles = Math.floor(this.random(2, 6));
-      this.createParticles(numParticles);
-    }
-    if(this.keyMap[32] && this.rateOfFire === 40) {
-      this.createProjectile();
-      this.reloading = true;
-    }
-    if(this.keyMap[88]) {
-      console.log(this.projectiles);
-    }
-    if(this.reloading) {
-      this.rateOfFire--;
-    }
-    if(this.rateOfFire <= 0) {
-      this.rateOfFire = 40;
-      this.reloading = false;
-    }
     this.position.x += this.speed.x;
     this.position.y += this.speed.y;
-    for(var i = 0; i < this.projectiles.length; i++) {
-      this.projectiles[i].update();
-      if(this.projectiles[i].edgeDetection()) {
-        this.projectiles.splice(i, 1);
-      }
-    }
+
+    //Particle effect for the thruster
     for(var j = 0; j < this.particles.length; j++) {
       this.particles[j].update();
       if(this.particles[j].life <= 0) {
@@ -157,9 +91,6 @@ export default class Ship {
     //ctx.closePath();
     ctx.stroke();
     ctx.restore();
-    this.projectiles.forEach(projectile => {
-      projectile.render(ctx);
-    });
     this.particles.forEach(particle => {
       particle.render(ctx);
     });
