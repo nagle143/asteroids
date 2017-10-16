@@ -309,7 +309,7 @@ export default class Game {
     if(this.asteroids.length === 0) {
       this.level++;
       this.lives++;
-      this.numAsteroids = 10 + this.level;
+      this.numAsteroids = 10 + 2* this.level;
       this.createAsteroids();
     }
 
@@ -317,6 +317,7 @@ export default class Game {
       this.ufoTimer--;
       if(this.ufoTimer <= 0) {
         this.ufo = new UFO();
+        this.ufoTimer = this.randomInt(500, 1000);
       }
     }
 
@@ -390,6 +391,9 @@ export default class Game {
     }
     if(this.keyMap[32] && this.rateOfFire === 40 && !this.respawning) {
       this.createProjectile();
+      if(this.ufo){
+        this.ufoProjectile();
+      }
       this.reloading = true;
     }
 

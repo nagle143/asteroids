@@ -20,16 +20,16 @@ export default class Asteroid {
 
   initVelocity() {
     //Sets speed of the asteroids, more mass = slower
-    var mag = 15 / this.mass;
+    var mag = 10 / this.mass;
     this.velocity.x = this.random(-mag, mag);
     this.velocity.y = this.random(-mag, mag);
   }
 
   createSurface() {
     //Don't calculate the last one so the start and end match up
-    var segments = 12;
+    var segments = 24;
     //15 degree increments
-    var angle = Math.PI * 2 / 12;
+    var angle = Math.PI * 2 / segments;
     var randomRadius = this.radius;
     var x;
     var y;
@@ -37,15 +37,16 @@ export default class Asteroid {
       if(this.randomInt(0, 100) > 70) {
         randomRadius = this.random(this.radius * 0.80, this.radius);
       }
-      x = this.x + Math.cos(i * angle) * randomRadius;
-      y = this.y - Math.sin(i * angle) * randomRadius;
+      x = Math.cos(i * angle) * randomRadius;
+      y = -Math.sin(i * angle) * randomRadius;
       this.surfacePath.push({x: x, y: y});
     }
+    console.log(this.surfacePath);
   }
 
   explodedVelocity() {
     //Sets speed of the asteroids, more mass = slower
-    var mag = 8 / this.mass;
+    var mag = 6 / this.mass;
     //Uses the direction given to ensure the asteroids leave the center of the original asteroid
     this.velocity.x = Math.cos(this.direction) * mag;
     this.velocity.y = -Math.sin(this.direction) * mag;
@@ -110,11 +111,11 @@ export default class Asteroid {
     context.save();
     context.strokeStyle = 'white';
     context.beginPath();
-    /*context.moveTo(this.surfacePath[0].x, this.surfacePath[0].y);
+    context.moveTo(this.x + this.surfacePath[0].x, this.y + this.surfacePath[0].y);
     for(var i = 1; i < this.surfacePath.length; i++) {
-      context.lineTo(this.surfacePath[i].x, this.surfacePath[i].y);
-    }*/
-    context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      context.lineTo(this.x + this.surfacePath[i].x, this.y + this.surfacePath[i].y);
+    }
+    //context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     context.closePath();
     context.stroke();
     context.restore();

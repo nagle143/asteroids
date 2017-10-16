@@ -6,7 +6,7 @@ export default class UFO extends Ship {
     this.initPosition();
     this.initVelocity();
     this.innerRadius = 10;
-    this.outerRadius = 20;
+    this.outerRadius = 25;
   }
 
   initVelocity() {
