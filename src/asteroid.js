@@ -1,12 +1,11 @@
 
 
 export default class Asteroid {
-  constructor(x, y, radius, mass, id, exploded) {
+  constructor(x, y, radius, mass, exploded) {
     this.x = x;
     this.y = y;
     this.radius = radius;
     this.mass = mass;
-    this.ID = id;
     this.exploded = exploded;
     this.velocity = {x: 0.0, y: 0.0};
     if(exploded) {
@@ -20,18 +19,8 @@ export default class Asteroid {
   }
 
   initVelocity() {
-    if(this.x < 0) {
-      this.velocity.x = this.random(1, 5);
-    }
-    else {
-      this.velocity.x = this.random(-1, -5);
-    }
-    if(this.y < 0) {
-      this.velocity.y = this.random(1, 5);
-    }
-    else {
-      this.velocity.y = this.random(1, 5);
-    }
+    this.velocity.x = this.random(-2, 2);
+    this.velocity.y = this.random(-2,2);
   }
 
   explodedVelocity() {
@@ -56,19 +45,18 @@ export default class Asteroid {
     * function to handle the particle leaving the edge of the screen
     */
   edgeDetection() {
-    if(this.x + 2.5* this.radius >= 1000) {
-      return true;
+    if(this.x >= 1000 + 2.5 * this.radius) {
+      this.x = -2 * this.radius;
     }
-    if(this.x -  2.5* this.radius <= 0) {
-      return true;
+    else if(this.x <= -2.5 * this.radius) {
+      this.x = 1000 + 2 * this.radius;
     }
-    if(this.y + 2.5 * this.radius >= 1000) {
-      return true;
+    if(this.y >= 1000 + 2.5 * this.radius) {
+      this.y = -2 * this.radius;
     }
-    if(this.y - 2.5 * this.radius <= 0) {
-      return true;
+    else if(this.y <= -2.5 * this.radius) {
+      this.y = 1000 + 2 * this.radius;
     }
-    return false;
   }
 
   /** @function random()
@@ -80,7 +68,16 @@ export default class Asteroid {
     return Math.random() * (max - min) + min;
   }
 
+  /** @function randomInt()
+    * @param int min is the minimum desire value
+    * @param int max is the maximum desire value
+    */
+  randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min)) + min;
+  }
+
   update() {
+    this.edgeDetection();
     this.x += this.velocity.x;
     this.y += this.velocity.y;
   }
@@ -89,7 +86,7 @@ export default class Asteroid {
     context.save();
     context.strokeStyle = 'white';
     context.beginPath();
-    context.ar(this.x, this.y, this.radius, 0, Math.PI * 2);
+    context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     context.closePath();
     context.stroke();
     context.restore();

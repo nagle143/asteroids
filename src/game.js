@@ -5,11 +5,13 @@ import Asteroid from './asteroid.js';
 export default class Game {
   constructor() {
     //Num Objects
-    this.numAsteroids = 2;
+    this.numAsteroids = 10;
     //Objects/Arrays
     this.ship = new Ship();
     this.asteroids = [];
-    //this.createAsteroids();
+    this.createAsteroids();
+    //this.addAsteroid(false);
+    //this.asteroids.push(new Asteroid(1000, -100, 25, 10, false));
 
     //HUD
     /*
@@ -42,14 +44,14 @@ export default class Game {
 
   createAsteroids() {
     while(this.asteroids.length < this.numAsteroids) {
-      this.addAsteroid();
+      this.addAsteroid(false);
     }
   }
 
     /** @function addAsteroid()
     * Function to add new asteroid to the list while making sure it is not spawned where a object already is
     */
-  addAsteroid() {
+  addAsteroid(exploded) {
     //Variables to establish the particle
     var x;
     var y;
@@ -61,27 +63,38 @@ export default class Game {
     while (currLength === this.asteroids.length) {
       //Var to determine if it would have spawned inside something
       var collision = false;
-      if(Math.floor(Math.random())) {
-        x = this.random(-100, -50);
-      }
-      else {
-        x = this.random(1050, 1100);
-      }
-      if(Math.floor(Math.random())) {
-        y = this.random(-100, -50);
-      }
-      else {
-        y = this.random(1050, 1100);
-      }
-      //Use a dumby radius to ensure no overlap with anything, radius is actually set based on mass
+      var spawnSide = this.randomInt(1, 5);
       radius = this.random(10, 50);
+      //Top
+      if(spawnSide === 1) {
+        x = this.random(-2 * radius, 1000 + 2 * radius);
+        y = - 2 * radius;
+      }
+      //Right
+      else if(spawnSide === 2) {
+        x = 1000 + 2 * radius;
+        y = this.random(-2 * radius, 1000 + 2 * radius);
+      }
+      //Bottom
+      else if(spawnSide === 3) {
+        x = this.random(-2 * radius, 1000 + 2 * radius);
+        y = 1000 + 2 * radius;
+      }
+      //Left
+      else {
+        x = - 2 * radius;
+        y = this.random(-2 * radius, 1000 + 2 * radius);
+      }
       mass = this.random(1, 10);
-      //Checks if the position is occupied by another particle
-      this.asteroids.forEach(asteroids => {
-        if(asteroids.collisionDetection(x, y, radius)) {
+      //Checks if the position is occupied by another asteroid
+      this.asteroids.forEach(asteroid => {
+        if(asteroid.collisionDetection(x, y, radius)) {
           collision = true;
         }
       });
+      if(!collision) {
+        this.asteroids.push(new Asteroid(x, y, radius, mass, exploded));
+      }
     }
     //Updates the Amplied variable because it only tracks the current state of the particles
     this.amplified = 100;
@@ -96,14 +109,27 @@ export default class Game {
     return Math.random() * (max - min) + min;
   }
 
+  /** @function randomInt()
+    * @param int min is the minimum desire value
+    * @param int max is the maximum desire value
+    */
+  randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min)) + min;
+  }
+
   update() {
     this.ship.update();
-    //this.asteroids.update();
+    this.asteroids.forEach(asteroid => {
+      asteroid.update();
+    });
   }
   render() {
     this.backBufferContext.fillStyle = 'black';
     this.backBufferContext.fillRect(0,0, 1000, 1000);
     this.ship.render(this.backBufferContext);
+    this.asteroids.forEach(asteroid => {
+      asteroid.render(this.backBufferContext);
+    });
     this.screenBufferContext.drawImage(this.backBufferCanvas, 0, 0);
   }
   loop() {
