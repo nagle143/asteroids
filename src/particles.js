@@ -10,6 +10,7 @@ export default class Particle {
     this.speed = speed;
     this.speedX = Math.cos(direction) * this.speed;
     this.speedY = -Math.sin(direction) * this.speed;
+    this.decayDistance = this.random(10, 50);
 
     //Binders
     this.update = this.update.bind(this);
@@ -17,11 +18,13 @@ export default class Particle {
     this.random = this.random.bind(this)
   }
   update() {
-    var dist = this.random(10, 50);
+    //random distance to determine if the particles updates or not
+    //Honestly, no idea why it works, but it does
+
     var dx = this.startX - this.x;
     var dy = this.startY - this.y;
     this.life--;
-    if(dist * dist <= dx * dx + dy * dy) {
+    if(this.decayDistance * this.decayDistance <= dx * dx + dy * dy) {
       return;
     }
     this.x += this.speedX;

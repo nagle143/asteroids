@@ -2,6 +2,7 @@
 import Ship from './ship.js';
 import Asteroid from './asteroid.js';
 import Projectile from './projectile.js';
+import Particle from './particles.js';
 
 export default class Game {
   constructor() {
@@ -16,6 +17,7 @@ export default class Game {
     this.reloading = false;
     this.asteroids = [];
     this.createAsteroids();
+    this.particles = [];
     //HUD Variables
     this.score = 0;
     this.lives = 3;
@@ -223,6 +225,18 @@ export default class Game {
     return false;
   }
 
+  explode(x, y, color) {
+    var numParticles = this.randomInt(50, 100);
+    var dir = this.random(0, Math.PI * 2);
+    //console.log("In explode")
+    for(var i = 0; i < numParticles; i ++) {
+      if(this.randomInt(0, 100) > 90) {
+        dir = this.random(0, Math.PI * 2);
+      }
+      this.particles.push(new Particle(x, y, Math.PI * dir, 7, color));
+    }
+  }
+
   /** @function random()
     * Function to get a random number between to values
     * @param int min is the minimum desired value
@@ -275,10 +289,12 @@ export default class Game {
         }
       }
     }
+
     //Checks for collisions between projectiles and asteroids
     for(var i = 0; i < this.projectiles.length; i++) {
       for(var j = 0; j < this.asteroids.length; j++) {
         if(this.projectileCollisionDetection(i, j)) {
+          this.explode(this.projectiles[i].x, this.projectiles[i].y, 'red');
           this.projectiles.splice(i, 1);
           //this.handleAsteriodExplosion(j);
           break;
@@ -290,11 +306,10 @@ export default class Game {
       //Check for ship crashing
       for(var i = 0; i < this.asteroids.length; i++) {
         if(this.detectShipCrash(this.asteroids[i])) {
-          this.ship.explode();
-          this.ship.color = 'black';
+          this.explode(this.ship.position.x, this.ship.position.y, this.ship.color);
           this.respawning = true;
           this.lives--;
-          this.ship.reset();
+          this.ship = new Ship();
         }
       }
     }
@@ -312,7 +327,7 @@ export default class Game {
         this.ship.velocity.dir = 0.0;
       }
     }
-    if(this.keyMap[87] && !this.respawnTimer <= 100) {
+    if(this.keyMap[87] && (this.respawnTimer <= 100 || !this.respawning)) {
       this.ship.velocity.mag = 0.1;
       this.ship.updateSpeed();
       var numParticles = Math.floor(this.random(2, 6));
@@ -326,10 +341,10 @@ export default class Game {
     //Controlling the rate of fire
     if(this.reloading) {
       this.rateOfFire--;
-    }
-    if(this.rateOfFire <= 0) {
-      this.rateOfFire = 40;
-      this.reloading = false;
+      if(this.rateOfFire <= 0) {
+        this.rateOfFire = 40;
+        this.reloading = false;
+      }
     }
 
     //Update projectiles, if there are any
@@ -339,29 +354,47 @@ export default class Game {
         this.projectiles.splice(i, 1);
       }
     }
+
+    //update particles
+    for(var j = 0; j < this.particles.length; j++) {
+      this.particles[j].update();
+      if(this.particles[j].life <= 0) {
+        this.particles.splice(j, 1);
+      }
+    }
   }
   render() {
+    //Initial Setup
     this.backBufferContext.fillStyle = 'black';
     this.backBufferContext.strokeStyle = 'blue';
     this.backBufferContext.font = '50px Times New Roman';
+    //Refresh canvas
     this.backBufferContext.fillRect(0,0, 1000, 1000);
     this.drawHUD();
+    //Display respawning if needed
     if(this.respawning) {
       this.backBufferContext.save();
       this.backBufferContext.globalAlpha = 0.5;
       this.backBufferContext.strokeText("RESPAWNING", 350, 500);
       this.backBufferContext.restore();
     }
-    if(this.respawnTimer <= 100) {
-      this.ship.color = 'green';
+    //Draw ship
+    if(!this.respawning || this.respawnTimer <= 100) {
+      this.ship.render(this.backBufferContext);
     }
-    this.ship.render(this.backBufferContext);
+    //Draw asteroids
     this.asteroids.forEach(asteroid => {
       asteroid.render(this.backBufferContext);
     });
+    //draw projectiles
     this.projectiles.forEach(projectile => {
       projectile.render(this.backBufferContext);
     });
+    //draw particles
+    this.particles.forEach(particle => {
+      particle.render(this.backBufferContext);
+    });
+    //Bit blit the back buffer onto the screen
     this.screenBufferContext.drawImage(this.backBufferCanvas, 0, 0);
   }
   loop() {
