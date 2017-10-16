@@ -1,14 +1,14 @@
 
 export default class Particle {
-  constructor(x, y, direction) {
+  constructor(x, y, direction, speed, color) {
     this.startX = x;
     this.startY = y;
     this.x = x;
     this.y = y;
-    this.life = 15;
-    this.color = 'red';
-    this.speed = 2.0;
-    this.speedX = Math.sin(direction) * this.speed;
+    this.life = 20;
+    this.color = color;
+    this.speed = speed;
+    this.speedX = Math.cos(direction) * this.speed;
     this.speedY = -Math.sin(direction) * this.speed;
 
     //Binders
@@ -17,15 +17,15 @@ export default class Particle {
     this.random = this.random.bind(this)
   }
   update() {
-    var dist = this.random(1, 10);
+    var dist = this.random(10, 50);
     var dx = this.startX - this.x;
     var dy = this.startY - this.y;
     this.life--;
     if(dist * dist <= dx * dx + dy * dy) {
       return;
     }
-      this.x += this.speedX;
-      this.y += this.speedY;
+    this.x += this.speedX;
+    this.y += this.speedY;
   }
   render(ctx) {
     ctx.save()

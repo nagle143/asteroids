@@ -9,6 +9,7 @@ export default class Ship {
     this.speed = {x: 0.0, y: 0.0};
     //particles
     this.particles = [];
+    this.color = 'green';
 
     //Binders
     this.update = this.update.bind(this);
@@ -52,16 +53,45 @@ export default class Ship {
     }
   }
 
+  explode() {
+    var numParticles = this.randomInt(50, 100);
+    var dir = this.random(0, Math.PI * 2);
+    //console.log("In explode")
+    for(var i = 0; i < numParticles; i ++) {
+      if(this.randomInt(0, 100) > 90) {
+        dir = this.random(0, Math.PI * 2);
+      }
+      this.particles.push(new Particle(this.position.x, this.position.y, Math.PI * dir, 7, 'green'));
+    }
+  }
+
+  reset() {
+    this.position.x = 500;
+    this.position.y = 500;
+    this.velocity.mag = 0.0;
+    this.velocity.dir = 0.0;
+    this.speed.x = 0.0;
+    this.speed.y = 0.0;
+  }
+
   createParticles(numParticles) {
     var x = this.position.x - Math.sin(this.velocity.dir)* 15;
     var y = this.position.y + Math.cos(this.velocity.dir)* 15;
     for(var i = 0; i < numParticles; i++) {
-      this.particles.push(new Particle(x, y, Math.PI * this.velocity.dir));
+      this.particles.push(new Particle(x, y, Math.PI * this.velocity.dir, 2.0, 'red'));
     }
   }
 
   random(min, max) {
     return Math.random() * (max - min) + min;
+  }
+
+  /** @function randomInt()
+    * @param int min is the minimum desire value
+    * @param int max is the maximum desire value
+    */
+  randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min)) + min;
   }
 
   update() {
@@ -80,7 +110,7 @@ export default class Ship {
 
   render(ctx) {
     ctx.save()
-    ctx.strokeStyle = 'green';
+    ctx.strokeStyle = this.color;
     ctx.beginPath();
     ctx.translate(this.position.x, this.position.y);
     ctx.rotate(this.velocity.dir);

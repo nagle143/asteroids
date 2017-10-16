@@ -9,24 +9,32 @@ export default class Game {
     this.numAsteroids = 10;
     //Objects/Arrays
     this.ship = new Ship();
+    this.respawning = false;
+    this.respawnTimer = 200;
     this.projectiles = [];
     this.rateOfFire = 40;
     this.reloading = false;
     this.asteroids = [];
     this.createAsteroids();
+    //HUD Variables
+    this.score = 0;
+    this.lives = 3;
+    this.level = 1;
+
+
     //this.addAsteroid(false);
     //this.asteroids.push(new Asteroid(1000, -100, 25, 10, false));
 
     //Input Map
     this.keyMap = {32: false, 65: false, 68: false, 87: false, 88: false};
+
     //HUD
-    /*
     this.HUDcanvas = document.getElementById('ui');
-    this.HUDcanvas.width = 200;
-    this.HUDcanvas.height = 1000;
+    this.HUDcanvas.width = 1000;
+    this.HUDcanvas.height = 100;
     this.HUDcontext = this.HUDcanvas.getContext('2d');
     document.body.appendChild(this.HUDcanvas);
-    */
+
     //Back Buffer
     this.backBufferCanvas = document.getElementById("canvas");
     this.backBufferCanvas.width = 1000;
@@ -44,11 +52,12 @@ export default class Game {
     this.update = this.update.bind(this);
     this.render = this.render.bind(this);
     this.loop = this.loop.bind(this);
+    this.createProjectile = this.createProjectile.bind(this);
+    this.projectileCollisionDetection = this.projectileCollisionDetection.bind(this);
     this.handleKeyDown = this.handleKeyDown.bind(this);
     this.handleKeyUp = this.handleKeyUp.bind(this);
     window.onkeydown = this.handleKeyDown;
     window.onkeyup = this.handleKeyUp;
-    this.createProjectile = this.createProjectile.bind(this);
 
     this.interval = setInterval(this.loop, 10);
   }
@@ -184,9 +193,31 @@ export default class Game {
     }
   }
 
-  projectileCollisionDetection(ax, ay, aradius) {
-    var distance = Math.pow(this.x - ax, 2) + Math.pow(this.y - ay, 2);
-    if(distance < Math.pow(this.radius + aradius, 2)) {
+  projectileCollisionDetection(pID, aID) {
+    var projectile = this.projectiles[pID];
+    var asteroid = this.asteroids[aID];
+    //console.log(this.projectiles[pID]);
+    var distance = Math.pow(projectile.x - asteroid.x, 2) + Math.pow(projectile.y - asteroid.y, 2);
+    if(distance < Math.pow(projectile.radius + asteroid.radius, 2)) {
+      return true;
+    }
+    return false;
+  }
+
+  handleAsteriodExplosion(aID) {
+    var asteroid = this.asteroids[aID];
+    var mass = asteroid.mass;
+    var x = asteroid.x;
+    var y = asteroid.y;
+    this.asteroids[aID].splice(aID, 1);
+    if(mass > 9) {
+      this.a
+    }
+  }
+
+  detectShipCrash(asteroid) {
+    var distance = Math.pow(this.ship.position.x - asteroid.x, 2) + Math.pow(this.ship.position.y - asteroid.y, 2);
+    if(distance < Math.pow(asteroid.radius + 15, 2)) {
       return true;
     }
     return false;
@@ -209,24 +240,64 @@ export default class Game {
     return Math.floor(Math.random() * (max - min)) + min;
   }
 
+  drawHUD() {
+    this.HUDcontext.fillStyle = 'black';
+    this.HUDcontext.strokeStyle = 'blue';
+    this.HUDcontext.fillRect(0, 0, 1000, 100);
+    this.HUDcontext.font = '30px Times New Roman';
+    this.HUDcontext.strokeText("LIVES: " + this.lives, 10, 50);
+    this.HUDcontext.strokeText("LEVEL: " + this.level, 450, 50);
+    this.HUDcontext.strokeText("SCORE: " + this.score, 800, 50);
+    this.HUDcontext.strokeText("ASTEROIDS: " + this.numAsteroids , 150, 50);
+  }
+
   update() {
     this.ship.update();
     this.asteroids.forEach(asteroid => {
       asteroid.update();
     });
 
+    if(this.respawning) {
+      this.respawnTimer--;
+      if(this.respawnTimer <= 0) {
+        this.respawnTimer = 200;
+        this.respawning = false;
+      }
+    }
+
     //Checks for collisions between particles
     for(var i = 0; i < this.asteroids.length; i++) {
       for(var j = 0; j < this.asteroids.length; j++) {
-        if(i != j) {
+        if(i !== j) {
           if(this.asteroids[i].collisionDetection(this.asteroids[j].x, this.asteroids[j].y, this.asteroids[j].radius)) {
             this.particleCollision(this.asteroids[i], this.asteroids[j]);
           }
         }
       }
     }
-
     //Checks for collisions between projectiles and asteroids
+    for(var i = 0; i < this.projectiles.length; i++) {
+      for(var j = 0; j < this.asteroids.length; j++) {
+        if(this.projectileCollisionDetection(i, j)) {
+          this.projectiles.splice(i, 1);
+          //this.handleAsteriodExplosion(j);
+          break;
+        }
+      }
+    }
+
+    if(!this.respawning) {
+      //Check for ship crashing
+      for(var i = 0; i < this.asteroids.length; i++) {
+        if(this.detectShipCrash(this.asteroids[i])) {
+          this.ship.explode();
+          this.ship.color = 'black';
+          this.respawning = true;
+          this.lives--;
+          this.ship.reset();
+        }
+      }
+    }
 
     //Input Map Applying
     if(this.keyMap[65]){
@@ -241,18 +312,15 @@ export default class Game {
         this.ship.velocity.dir = 0.0;
       }
     }
-    if(this.keyMap[87]) {
+    if(this.keyMap[87] && !this.respawnTimer <= 100) {
       this.ship.velocity.mag = 0.1;
       this.ship.updateSpeed();
       var numParticles = Math.floor(this.random(2, 6));
       this.ship.createParticles(numParticles);
     }
-    if(this.keyMap[32] && this.rateOfFire === 40) {
+    if(this.keyMap[32] && this.rateOfFire === 40 && !this.respawning) {
       this.createProjectile();
       this.reloading = true;
-    }
-    if(this.keyMap[88]) {
-      console.log(this.projectiles);
     }
 
     //Controlling the rate of fire
@@ -274,7 +342,19 @@ export default class Game {
   }
   render() {
     this.backBufferContext.fillStyle = 'black';
+    this.backBufferContext.strokeStyle = 'blue';
+    this.backBufferContext.font = '50px Times New Roman';
     this.backBufferContext.fillRect(0,0, 1000, 1000);
+    this.drawHUD();
+    if(this.respawning) {
+      this.backBufferContext.save();
+      this.backBufferContext.globalAlpha = 0.5;
+      this.backBufferContext.strokeText("RESPAWNING", 350, 500);
+      this.backBufferContext.restore();
+    }
+    if(this.respawnTimer <= 100) {
+      this.ship.color = 'green';
+    }
     this.ship.render(this.backBufferContext);
     this.asteroids.forEach(asteroid => {
       asteroid.render(this.backBufferContext);
