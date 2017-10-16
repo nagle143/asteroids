@@ -59,7 +59,7 @@ export default class Ship {
     for(var i = 0; i < numParticles; i++) {
       var dx = x + this.random(-2, 2);
       var dy = y + this.random(-2, 2);
-      this.particles.push(new Particle(dx, dy, Math.PI * this.velocity.dir, 2.0, 'red'));
+      this.particles.push(new Particle(dx, dy, Math.PI * this.velocity.dir, 2.0, 'red', 20));
     }
   }
 

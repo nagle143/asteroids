@@ -6,6 +6,8 @@ export default class Asteroid {
     this.y = y;
     this.mass = mass;
     this.radius = mass;
+    this.surfacePath = [];
+    this.createSurface();
     this.direction = direction;
     this.velocity = {x: 0.0, y: 0.0};
     if(this.direction === -1.0) {
@@ -14,17 +16,37 @@ export default class Asteroid {
     else {
       this.explodedVelocity();
     }
-    //Binders
   }
 
   initVelocity() {
+    //Sets speed of the asteroids, more mass = slower
     var mag = 15 / this.mass;
     this.velocity.x = this.random(-mag, mag);
     this.velocity.y = this.random(-mag, mag);
   }
 
+  createSurface() {
+    //Don't calculate the last one so the start and end match up
+    var segments = 12;
+    //15 degree increments
+    var angle = Math.PI * 2 / 12;
+    var randomRadius = this.radius;
+    var x;
+    var y;
+    for(var i = 0; i < segments; i++) {
+      if(this.randomInt(0, 100) > 70) {
+        randomRadius = this.random(this.radius * 0.80, this.radius);
+      }
+      x = this.x + Math.cos(i * angle) * randomRadius;
+      y = this.y - Math.sin(i * angle) * randomRadius;
+      this.surfacePath.push({x: x, y: y});
+    }
+  }
+
   explodedVelocity() {
-    var mag = 10 / this.mass;
+    //Sets speed of the asteroids, more mass = slower
+    var mag = 8 / this.mass;
+    //Uses the direction given to ensure the asteroids leave the center of the original asteroid
     this.velocity.x = Math.cos(this.direction) * mag;
     this.velocity.y = -Math.sin(this.direction) * mag;
   }
@@ -88,6 +110,10 @@ export default class Asteroid {
     context.save();
     context.strokeStyle = 'white';
     context.beginPath();
+    /*context.moveTo(this.surfacePath[0].x, this.surfacePath[0].y);
+    for(var i = 1; i < this.surfacePath.length; i++) {
+      context.lineTo(this.surfacePath[i].x, this.surfacePath[i].y);
+    }*/
     context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     context.closePath();
     context.stroke();

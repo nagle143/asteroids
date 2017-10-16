@@ -1,11 +1,11 @@
 
 export default class Particle {
-  constructor(x, y, direction, speed, color) {
+  constructor(x, y, direction, speed, color, life) {
     this.startX = x;
     this.startY = y;
     this.x = x;
     this.y = y;
-    this.life = 20;
+    this.life = life;
     this.color = color;
     this.speed = speed;
     this.speedX = Math.cos(direction) * this.speed;

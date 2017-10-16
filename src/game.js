@@ -3,6 +3,7 @@ import Ship from './ship.js';
 import Asteroid from './asteroid.js';
 import Projectile from './projectile.js';
 import Particle from './particles.js';
+import UFO from './ufo.js';
 
 export default class Game {
   constructor() {
@@ -10,6 +11,8 @@ export default class Game {
     this.numAsteroids = 10;
     //Objects/Arrays
     this.ship = new Ship();
+    this.ufo;
+    this.ufoTimer = this.randomInt(500, 1000);
     this.respawning = false;
     this.respawnTimer = 300;
     this.projectiles = [];
@@ -22,6 +25,7 @@ export default class Game {
     this.score = 0;
     this.lives = 3;
     this.level = 1;
+    this.timer = 200;
 
 
     //this.addAsteroid(false);
@@ -78,7 +82,19 @@ export default class Game {
     //15 is the length from center to the top pointd
     var x = this.ship.position.x + Math.sin(this.ship.velocity.dir)* 15;
     var y = this.ship.position.y - Math.cos(this.ship.velocity.dir)* 15;
-    this.projectiles.push(new Projectile(x, y, this.ship.velocity.dir));
+    this.projectiles.push(new Projectile(x, y, this.ship.velocity.dir, 'red'));
+  }
+  ufoProjectile() {
+    var dx = this.ufo.position.x - this.ship.position.x;
+    var dy = this.ufo.position.y - this.ship.position.y;
+    var distance = Math.sqrt(dx * dx + dy * dy);
+    var direction = Math.acos((dy)/ distance);
+    if(dx > 0) {
+      direction *= -1;
+    }
+    var x = this.ufo.position.x + Math.sin(direction)* this.ufo.outerRadius;
+    var y = this.ufo.position.y - Math.cos(direction)* this.ufo.outerRadius;
+    this.projectiles.push(new Projectile(x, y, direction, 'violet'));
   }
 
   createAsteroids() {
@@ -131,7 +147,7 @@ export default class Game {
         }
       });
       if(!collision) {
-        this.asteroids.push(new Asteroid(x, y, mass, -1.0));
+        this.asteroids.push(new Asteroid(x, y, mass, exploded));
       }
     }
     //Updates the Amplied variable because it only tracks the current state of the particles
@@ -226,6 +242,9 @@ export default class Game {
         direction += angleChange;
       }
     }
+    else {
+      this.numAsteroids--;
+    }
     //Smaller asteroids are harder to hit, thus more score
     this.score += Math.floor(100 / mass);
   }
@@ -246,7 +265,7 @@ export default class Game {
       if(this.randomInt(0, 100) > 90) {
         dir = this.random(0, Math.PI * 2);
       }
-      this.particles.push(new Particle(x, y, Math.PI * dir, 7, color));
+      this.particles.push(new Particle(x, y, Math.PI * dir, 7, color, 20));
     }
   }
 
@@ -280,9 +299,26 @@ export default class Game {
 
   update() {
     this.ship.update();
+    if(this.ufo) {
+      this.ufo.update();
+    }
     this.asteroids.forEach(asteroid => {
       asteroid.update();
     });
+
+    if(this.asteroids.length === 0) {
+      this.level++;
+      this.lives++;
+      this.numAsteroids = 10 + this.level;
+      this.createAsteroids();
+    }
+
+    if(!this.ufo && this.ufoTimer > 0) {
+      this.ufoTimer--;
+      if(this.ufoTimer <= 0) {
+        this.ufo = new UFO();
+      }
+    }
 
     if(this.respawning) {
       this.respawnTimer--;
@@ -292,7 +328,7 @@ export default class Game {
       }
     }
 
-    //Checks for collisions between particles
+    //Checks for collisions between asteroids
     for(var i = 0; i < this.asteroids.length; i++) {
       for(var j = 0; j < this.asteroids.length; j++) {
         if(i !== j) {
@@ -323,7 +359,12 @@ export default class Game {
           this.explode(this.ship.position.x, this.ship.position.y, this.ship.color);
           this.respawning = true;
           this.lives--;
-          this.ship = new Ship();
+          if(this.lives >= 0) {
+            this.ship = new Ship();
+          }
+          else {
+            this.gameOver = true;
+          }
         }
       }
     }
@@ -386,11 +427,15 @@ export default class Game {
     this.backBufferContext.fillRect(0,0, 1000, 1000);
     this.drawHUD();
     //Display respawning if needed
-    if(this.respawning) {
+    if(this.respawning && !this.gameOver) {
       this.backBufferContext.save();
       this.backBufferContext.globalAlpha = 0.5;
       this.backBufferContext.strokeText("RESPAWNING", 350, 500);
       this.backBufferContext.restore();
+    }
+    //Draw UFO
+    if(this.ufo) {
+      this.ufo.render(this.backBufferContext);
     }
     //Draw ship
     if(!this.respawning || this.respawnTimer <= 150) {
@@ -412,7 +457,13 @@ export default class Game {
     this.screenBufferContext.drawImage(this.backBufferCanvas, 0, 0);
   }
   loop() {
-    this.update();
-    this.render();
+    if(!this.gameOver) {
+      this.update();
+      this.render();
+    }
+    else {
+      this.screenBufferContext.font = "50px Times New Roman";
+      this.screenBufferContext.strokeText("GAME OVER", 350, 500);
+    }
   }
 }
