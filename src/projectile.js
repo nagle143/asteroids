@@ -4,8 +4,8 @@ export default class Projectile {
   constructor(x, y, direction) {
     this.x = x;
     this.y = y;
-    this.radius = 4;
-    this.velocity = {mag: 3.0, dir: direction};
+    this.radius = 3;
+    this.velocity = {mag: 4.0, dir: direction};
     this.speed = {x: 0.0, y: 0.0};
     this.initSpeed();
 

@@ -15,6 +15,7 @@ export default class Asteroid {
     else {
       //initVelocity();
     }
+    this.initVelocity();
     //Binders
   }
 

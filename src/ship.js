@@ -10,7 +10,8 @@ export default class Ship {
     this.speed = {x: 0.0, y: 0.0};
     //Projectile Array
     this.projectiles = [];
-    this.rateOfFire = 30;
+    this.rateOfFire = 40;
+    this.reloading = false;
     //particles
     this.particles = [];
 
@@ -24,7 +25,6 @@ export default class Ship {
     this.handleKeyDown = this.handleKeyDown.bind(this);
     this.handleKeyUp = this.handleKeyUp.bind(this);
     this.createProjectile = this.createProjectile.bind(this);
-    this.controlRateOfFire = this.controlRateOfFire.bind(this);
     window.onkeydown = this.handleKeyDown;
     window.onkeyup = this.handleKeyUp;
   }
@@ -90,13 +90,6 @@ export default class Ship {
     }
   }
 
-  controlRateOfFire() {
-    while(this.rateOfFire > 0) {
-      this.rateOfFire--;
-    }
-    this.rateOfFire = 30;
-  }
-
   random(min, max) {
     return Math.random() * (max - min) + min;
   }
@@ -121,12 +114,19 @@ export default class Ship {
       var numParticles = Math.floor(this.random(2, 6));
       this.createParticles(numParticles);
     }
-    if(this.keyMap[32] && this.rateOfFire === 30) {
+    if(this.keyMap[32] && this.rateOfFire === 40) {
       this.createProjectile();
-      this.controlRateOfFire();
+      this.reloading = true;
     }
     if(this.keyMap[88]) {
       console.log(this.projectiles);
+    }
+    if(this.reloading) {
+      this.rateOfFire--;
+    }
+    if(this.rateOfFire <= 0) {
+      this.rateOfFire = 40;
+      this.reloading = false;
     }
     this.position.x += this.speed.x;
     this.position.y += this.speed.y;
