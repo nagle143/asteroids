@@ -11,7 +11,7 @@ export default class Game {
     //Objects/Arrays
     this.ship = new Ship();
     this.respawning = false;
-    this.respawnTimer = 200;
+    this.respawnTimer = 300;
     this.projectiles = [];
     this.rateOfFire = 40;
     this.reloading = false;
@@ -83,7 +83,7 @@ export default class Game {
 
   createAsteroids() {
     while(this.asteroids.length < this.numAsteroids) {
-      this.addAsteroid(false);
+      this.addAsteroid(-1.0);
     }
   }
 
@@ -94,7 +94,7 @@ export default class Game {
     //Variables to establish the particle
     var x;
     var y;
-    var radius;
+    var radius = 50;
     var mass;
     //Var to control the while loop
     var currLength = this.asteroids.length;
@@ -103,7 +103,6 @@ export default class Game {
       //Var to determine if it would have spawned inside something
       var collision = false;
       var spawnSide = this.randomInt(1, 5);
-      radius = this.random(10, 50);
       //Top
       if(spawnSide === 1) {
         x = this.random(-2 * radius, 1000 + 2 * radius);
@@ -124,7 +123,7 @@ export default class Game {
         x = - 2 * radius;
         y = this.random(-2 * radius, 1000 + 2 * radius);
       }
-      mass = this.random(1, 10);
+      mass = this.random(10, 50);
       //Checks if the position is occupied by another asteroid
       this.asteroids.forEach(asteroid => {
         if(asteroid.collisionDetection(x, y, radius)) {
@@ -132,7 +131,7 @@ export default class Game {
         }
       });
       if(!collision) {
-        this.asteroids.push(new Asteroid(x, y, radius, mass, exploded));
+        this.asteroids.push(new Asteroid(x, y, mass, -1.0));
       }
     }
     //Updates the Amplied variable because it only tracks the current state of the particles
@@ -211,10 +210,24 @@ export default class Game {
     var mass = asteroid.mass;
     var x = asteroid.x;
     var y = asteroid.y;
-    this.asteroids[aID].splice(aID, 1);
-    if(mass > 9) {
-      this.a
+    this.asteroids.splice(aID, 1);
+    if(mass >= 15) {
+      //random number of pieces the asteroid will break into
+      var random = this.randomInt(2, 4);
+      this.numAsteroids += random - 1;
+      mass /= random;
+      var direction = this.random(0, 2 * Math.PI);
+      var angleChange = 2 * Math.PI / random;
+      for(var i = 0; i < random; i++) {
+        //Since mass is also the radius
+        var newX = x + Math.cos(direction) * mass;
+        var newY = y - Math.sin(direction) * mass;
+        this.asteroids.push(new Asteroid(newX, newY, mass, direction));
+        direction += angleChange;
+      }
     }
+    //Smaller asteroids are harder to hit, thus more score
+    this.score += Math.floor(100 / mass);
   }
 
   detectShipCrash(asteroid) {
@@ -274,7 +287,7 @@ export default class Game {
     if(this.respawning) {
       this.respawnTimer--;
       if(this.respawnTimer <= 0) {
-        this.respawnTimer = 200;
+        this.respawnTimer = 300;
         this.respawning = false;
       }
     }
@@ -296,7 +309,8 @@ export default class Game {
         if(this.projectileCollisionDetection(i, j)) {
           this.explode(this.projectiles[i].x, this.projectiles[i].y, 'red');
           this.projectiles.splice(i, 1);
-          //this.handleAsteriodExplosion(j);
+          this.explode(this.asteroids[j].x, this.asteroids[j].y, 'white');
+          this.handleAsteriodExplosion(j);
           break;
         }
       }
@@ -327,7 +341,7 @@ export default class Game {
         this.ship.velocity.dir = 0.0;
       }
     }
-    if(this.keyMap[87] && (this.respawnTimer <= 100 || !this.respawning)) {
+    if(this.keyMap[87] && (this.respawnTimer <= 150 || !this.respawning)) {
       this.ship.velocity.mag = 0.1;
       this.ship.updateSpeed();
       var numParticles = Math.floor(this.random(2, 6));
@@ -379,7 +393,7 @@ export default class Game {
       this.backBufferContext.restore();
     }
     //Draw ship
-    if(!this.respawning || this.respawnTimer <= 100) {
+    if(!this.respawning || this.respawnTimer <= 150) {
       this.ship.render(this.backBufferContext);
     }
     //Draw asteroids

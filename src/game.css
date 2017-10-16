@@ -2,8 +2,8 @@ canvas {
   position: absolute;
   left: 5px;
   top: 5px;
-  width: 900px;
-  height: 900px;
+  width: 800px;
+  height: 800px;
   background-color: 'black';
 }
 
@@ -11,7 +11,7 @@ canvas {
   position: absolute;
   background-color: red;
   left: 5px;
-  top: 905px;
-  width: 900px;
+  top: 805px;
+  width: 800px;
   height: 75px;
 }

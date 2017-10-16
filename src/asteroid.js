@@ -1,30 +1,32 @@
 
 
 export default class Asteroid {
-  constructor(x, y, radius, mass, exploded) {
+  constructor(x, y, mass, direction) {
     this.x = x;
     this.y = y;
-    this.radius = radius;
     this.mass = mass;
-    this.exploded = exploded;
+    this.radius = mass;
+    this.direction = direction;
     this.velocity = {x: 0.0, y: 0.0};
-    if(exploded) {
-      //explodedVelocity();
+    if(this.direction === -1.0) {
+      this.initVelocity();
     }
     else {
-      //initVelocity();
+      this.explodedVelocity();
     }
-    this.initVelocity();
     //Binders
   }
 
   initVelocity() {
-    this.velocity.x = this.random(-2, 2);
-    this.velocity.y = this.random(-2,2);
+    var mag = 15 / this.mass;
+    this.velocity.x = this.random(-mag, mag);
+    this.velocity.y = this.random(-mag, mag);
   }
 
   explodedVelocity() {
-
+    var mag = 10 / this.mass;
+    this.velocity.x = Math.cos(this.direction) * mag;
+    this.velocity.y = -Math.sin(this.direction) * mag;
   }
 
     /** @function collisionDetection()
