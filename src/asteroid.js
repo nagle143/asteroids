@@ -20,7 +20,7 @@ export default class Asteroid {
 
   initVelocity() {
     //Sets speed of the asteroids, more mass = slower
-    var mag = 10 / this.mass;
+    var mag = 12 / this.mass;
     this.velocity.x = this.random(-mag, mag);
     this.velocity.y = this.random(-mag, mag);
   }
@@ -41,12 +41,11 @@ export default class Asteroid {
       y = -Math.sin(i * angle) * randomRadius;
       this.surfacePath.push({x: x, y: y});
     }
-    console.log(this.surfacePath);
   }
 
   explodedVelocity() {
     //Sets speed of the asteroids, more mass = slower
-    var mag = 6 / this.mass;
+    var mag = 8 / this.mass;
     //Uses the direction given to ensure the asteroids leave the center of the original asteroid
     this.velocity.x = Math.cos(this.direction) * mag;
     this.velocity.y = -Math.sin(this.direction) * mag;

@@ -7,6 +7,7 @@ export default class Ship {
     //Velocity to determine the magnitude/direction of the ship
     this.velocity = {mag: 0.0, dir: 0.0};
     this.speed = {x: 0.0, y: 0.0};
+    this.radius = 15;
     //particles
     this.particles = [];
     this.color = 'green';
@@ -39,23 +40,23 @@ export default class Ship {
   }
 
   edgeDetection() {
-    if(this.position.x <= -15) {
+    if(this.position.x <= -this.radius) {
       this.position.x = 1000;
     }
-    if(this.position.y <= -15) {
+    if(this.position.y <= -this.radius) {
       this.position.y = 1000;
     }
-    if(this.position.x >= 1015) {
+    if(this.position.x >= 1000 + this.radius) {
       this.position.x = 0;
     }
-    if(this.position.y >= 1015) {
+    if(this.position.y >= 1000 + this.radius) {
       this.position.y = 0;
     }
   }
 
   createParticles(numParticles) {
-    var x = this.position.x - Math.sin(this.velocity.dir)* 15;
-    var y = this.position.y + Math.cos(this.velocity.dir)* 15;
+    var x = this.position.x - Math.sin(this.velocity.dir)* this.radius;
+    var y = this.position.y + Math.cos(this.velocity.dir)* this.radius;
     for(var i = 0; i < numParticles; i++) {
       var dx = x + this.random(-2, 2);
       var dy = y + this.random(-2, 2);
@@ -95,11 +96,11 @@ export default class Ship {
     ctx.beginPath();
     ctx.translate(this.position.x, this.position.y);
     ctx.rotate(this.velocity.dir);
-    ctx.moveTo(0, -15);
-    ctx.lineTo(10, 15);
-    ctx.lineTo(-10, 15);
-    ctx.lineTo(0, -15);
-    //ctx.closePath();
+    ctx.moveTo(0, -this.radius);
+    ctx.lineTo(10, this.radius);
+    ctx.lineTo(-10, this.radius);
+    ctx.lineTo(0, -this.radius);
+    ctx.closePath();
     ctx.stroke();
     ctx.restore();
     this.particles.forEach(particle => {
