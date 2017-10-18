@@ -3,7 +3,8 @@ import Particle from './particles.js';
 export default class Ship {
   constructor() {
     //position of the center of the Ship
-    this.position = {x: 500, y: 500};
+    this.x = 500;
+    this.y = 500;
     //Velocity to determine the magnitude/direction of the ship
     this.velocity = {mag: 0.0, dir: 0.0};
     this.speed = {x: 0.0, y: 0.0};
@@ -40,23 +41,23 @@ export default class Ship {
   }
 
   edgeDetection() {
-    if(this.position.x <= -this.radius) {
-      this.position.x = 1000;
+    if(this.x <= -this.radius) {
+      this.x = 1000;
     }
-    if(this.position.y <= -this.radius) {
-      this.position.y = 1000;
+    if(this.y <= -this.radius) {
+      this.y = 1000;
     }
-    if(this.position.x >= 1000 + this.radius) {
-      this.position.x = 0;
+    if(this.x >= 1000 + this.radius) {
+      this.x = 0;
     }
-    if(this.position.y >= 1000 + this.radius) {
-      this.position.y = 0;
+    if(this.y >= 1000 + this.radius) {
+      this.y = 0;
     }
   }
 
   createParticles(numParticles) {
-    var x = this.position.x - Math.sin(this.velocity.dir)* this.radius;
-    var y = this.position.y + Math.cos(this.velocity.dir)* this.radius;
+    var x = this.x - Math.sin(this.velocity.dir)* this.radius;
+    var y = this.y + Math.cos(this.velocity.dir)* this.radius;
     for(var i = 0; i < numParticles; i++) {
       var dx = x + this.random(-2, 2);
       var dy = y + this.random(-2, 2);
@@ -78,8 +79,8 @@ export default class Ship {
 
   update() {
     this.edgeDetection();
-    this.position.x += this.speed.x;
-    this.position.y += this.speed.y;
+    this.x += this.speed.x;
+    this.y += this.speed.y;
 
     //Particle effect for the thruster
     for(var j = 0; j < this.particles.length; j++) {
@@ -94,7 +95,7 @@ export default class Ship {
     ctx.save()
     ctx.strokeStyle = this.color;
     ctx.beginPath();
-    ctx.translate(this.position.x, this.position.y);
+    ctx.translate(this.x, this.y);
     ctx.rotate(this.velocity.dir);
     ctx.moveTo(0, -this.radius);
     ctx.lineTo(10, this.radius);

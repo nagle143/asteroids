@@ -22,43 +22,43 @@ export default class UFO extends Ship {
     var spawnSide = this.randomInt(1, 5);
     //Top
     if(spawnSide === 1) {
-      this.position.x = this.random(-2 * this.radius, 1000 + 2 * this.radius);
-      this.position.y = - 2 * this.radius;
+      this.x = this.random(-2 * this.radius, 1000 + 2 * this.radius);
+      this.y = - 2 * this.radius;
     }
     //Right
     else if(spawnSide === 2) {
-      this.position.x = 1000 + 2 * this.radius;
-      this.position.y = this.random(-2 * this.radius, 1000 + 2 * this.radius);
+      this.x = 1000 + 2 * this.radius;
+      this.y = this.random(-2 * this.radius, 1000 + 2 * this.radius);
     }
     //Bottom
     else if(spawnSide === 3) {
-      this.position.x = this.random(-2 * this.radius, 1000 + 2 * this.radius);
-      this.position.y = 1000 + 2 * this.radius;
+      this.x = this.random(-2 * this.radius, 1000 + 2 * this.radius);
+      this.y = 1000 + 2 * this.radius;
     }
     //Left
     else {
-      this.position.x = - 2 * this.radius;
-      this.position.y = this.random(-2 * this.radius, 1000 + 2 * this.radius);
+      this.x = - 2 * this.radius;
+      this.y = this.random(-2 * this.radius, 1000 + 2 * this.radius);
     }
-    //this.position.x = 400;
-    //this.position.y = 400;
+    //this.x = 400;
+    //this.y = 400;
   }
 
   /** @function edgeDetection()
     * function to handle the asteroid leaving the edge of the screen
     */
   edgeDetection() {
-    if(this.position.x >= 1000 + 2.5 * this.radius) {
-      this.position.x = -2 * this.radius;
+    if(this.x >= 1000 + 2.5 * this.radius) {
+      this.x = -2 * this.radius;
     }
-    else if(this.position.x <= -2.5 * this.radius) {
-      this.position.x = 1000 + 2 * this.radius;
+    else if(this.x <= -2.5 * this.radius) {
+      this.x = 1000 + 2 * this.radius;
     }
-    if(this.position.y >= 1000 + 2.5 * this.radius) {
-      this.position.y = -2 * this.radius;
+    if(this.y >= 1000 + 2.5 * this.radius) {
+      this.y = -2 * this.radius;
     }
-    else if(this.position.y <= -2.5 * this.radius) {
-      this.position.y = 1000 + 2 * this.radius;
+    else if(this.y <= -2.5 * this.radius) {
+      this.y = 1000 + 2 * this.radius;
     }
   }
 
@@ -84,8 +84,8 @@ export default class UFO extends Ship {
   update() {
     this.edgeDetection();
     this.velocity.dir += 0.01;
-    this.position.x += this.speed.x;
-    this.position.y += this.speed.y;
+    this.x += this.speed.x;
+    this.y += this.speed.y;
   }
 
   render(ctx) {
@@ -93,11 +93,11 @@ export default class UFO extends Ship {
     ctx.save();
     ctx.strokeStyle = this.color;
     ctx.beginPath();
-    ctx.arc(this.position.x, this.position.y, this.innerRadius, 0, Math.PI * 2);
+    ctx.arc(this.x, this.y, this.innerRadius, 0, Math.PI * 2);
     ctx.closePath();
     ctx.stroke();
     ctx.beginPath();
-    ctx.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     ctx.closePath();
     ctx.stroke();
     ctx.restore();
