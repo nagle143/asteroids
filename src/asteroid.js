@@ -4,12 +4,17 @@ export default class Asteroid {
   constructor(x, y, mass, direction) {
     this.x = x;
     this.y = y;
+    //if somehow this gets called with a mass less than 5
+    if(mass < 5) {
+      mass = 5;
+    }
     this.mass = mass;
     this.radius = mass;
     this.surfacePath = [];
     this.createSurface();
     this.direction = direction;
     this.velocity = {x: 0.0, y: 0.0};
+    this.angle = 0.0;
     if(this.direction === -1.0) {
       this.initVelocity();
     }
@@ -21,12 +26,12 @@ export default class Asteroid {
   initVelocity() {
     //Sets speed of the asteroids, more mass = slower
     var mag = 12 / this.mass;
-    this.velocity.x = this.random(-mag, mag);
-    this.velocity.y = this.random(-mag, mag);
+    //Keeps the huge asteroids from moving too slow
+    this.velocity.x = Math.randomBetween(-mag, mag);
+    this.velocity.y = Math.randomBetween(-mag, mag);
   }
 
   createSurface() {
-    //Don't calculate the last one so the start and end match up
     var segments = 24;
     //15 degree increments
     var angle = Math.PI * 2 / segments;
@@ -34,8 +39,8 @@ export default class Asteroid {
     var x;
     var y;
     for(var i = 0; i < segments; i++) {
-      if(this.randomInt(0, 100) > 70) {
-        randomRadius = this.random(this.radius * 0.80, this.radius);
+      if(Math.randomInt(0, 100) > 70) {
+        randomRadius = Math.randomBetween(this.radius * 0.80, this.radius);
       }
       x = Math.cos(i * angle) * randomRadius;
       y = -Math.sin(i * angle) * randomRadius;
@@ -83,25 +88,14 @@ export default class Asteroid {
     }
   }
 
-  /** @function random()
-    * Function to get a random number between to values
-    * @param int min is the minimum desired value
-    * @param int max is the maximum desired value
-    */
-  random(min, max) {
-    return Math.random() * (max - min) + min;
-  }
-
-  /** @function randomInt()
-    * @param int min is the minimum desire value
-    * @param int max is the maximum desire value
-    */
-  randomInt(min, max) {
-    return Math.floor(Math.random() * (max - min)) + min;
-  }
-
   update() {
     this.edgeDetection();
+    if(this.velocity.x > 0) {
+      this.angle += 0.01;
+    }
+    else {
+      this.angle -= 0.01;
+    }
     this.x += this.velocity.x;
     this.y += this.velocity.y;
   }
@@ -109,10 +103,12 @@ export default class Asteroid {
   render(context) {
     context.save();
     context.strokeStyle = 'white';
+    context.translate(this.x, this.y);
+    context.rotate(this.angle);
     context.beginPath();
-    context.moveTo(this.x + this.surfacePath[0].x, this.y + this.surfacePath[0].y);
+    context.moveTo(this.surfacePath[0].x,this.surfacePath[0].y);
     for(var i = 1; i < this.surfacePath.length; i++) {
-      context.lineTo(this.x + this.surfacePath[i].x, this.y + this.surfacePath[i].y);
+      context.lineTo(this.surfacePath[i].x, this.surfacePath[i].y);
     }
     //context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     context.closePath();

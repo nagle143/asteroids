@@ -10,12 +10,7 @@ export default class Particle {
     this.speed = speed;
     this.speedX = Math.cos(direction) * this.speed;
     this.speedY = -Math.sin(direction) * this.speed;
-    this.decayDistance = this.random(10, 50);
-
-    //Binders
-    this.update = this.update.bind(this);
-    this.render = this.render.bind(this);
-    this.random = this.random.bind(this)
+    this.decayDistance = Math.randomBetween(10, 50);
   }
   update() {
     //random distance to determine if the particles updates or not
@@ -38,8 +33,5 @@ export default class Particle {
     ctx.closePath();
     ctx.fill();
     ctx.restore();
-  }
-  random(min, max) {
-    return Math.random() * (max - min) + min;
   }
 }

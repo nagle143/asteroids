@@ -4,26 +4,20 @@ export default class Projectile {
   constructor(x, y, direction, color) {
     this.x = x;
     this.y = y;
-    this.radius = 3;
+    this.radius = 3.5;
     this.color = color;
     this.velocity = {mag: 4.0, dir: direction};
     this.speed = {x: 0.0, y: 0.0};
     this.initSpeed();
     this.particles = [];
-
-    //Binders
-    this.update = this.update.bind(this);
-    this.render = this.render.bind(this);
-    this.initSpeed = this.initSpeed.bind(this);
-
   }
 
   createParticles(numParticles) {
     var x = this.x - Math.sin(this.velocity.dir)* this.radius;
     var y = this.y + Math.cos(this.velocity.dir)* this.radius;
     for(var i = 0; i < numParticles; i++) {
-      var dx = x + this.random(-this.radius, this.radius);
-      var dy = y + this.random(-this.radius, this.radius);
+      var dx = x + Math.randomBetween(-this.radius, this.radius);
+      var dy = y + Math.randomBetween(-this.radius, this.radius);
       this.particles.push(new Particle(dx, dy, Math.PI * this.velocity.dir, 1.0, this.color, 10));
     }
   }
@@ -41,20 +35,8 @@ export default class Projectile {
     return false;
   }
 
-  random(min, max) {
-    return Math.random() * (max - min) + min;
-  }
-
-  /** @function randomInt()
-    * @param int min is the minimum desire value
-    * @param int max is the maximum desire value
-    */
-  randomInt(min, max) {
-    return Math.floor(Math.random() * (max - min)) + min;
-  }
-
   update() {
-    this.createParticles(this.randomInt(3, 6));
+    this.createParticles(Math.randomInt(3, 6));
     this.x += this.speed.x;
     this.y += this.speed.y;
     //Particle effect for the trail

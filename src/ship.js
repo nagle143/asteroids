@@ -12,11 +12,6 @@ export default class Ship {
     //particles
     this.particles = [];
     this.color = 'green';
-
-    //Binders
-    this.update = this.update.bind(this);
-    this.render = this.render.bind(this);
-    this.updateSpeed = this.updateSpeed.bind(this);
   }
 
   updateSpeed() {
@@ -59,22 +54,10 @@ export default class Ship {
     var x = this.x - Math.sin(this.velocity.dir)* this.radius;
     var y = this.y + Math.cos(this.velocity.dir)* this.radius;
     for(var i = 0; i < numParticles; i++) {
-      var dx = x + this.random(-2, 2);
-      var dy = y + this.random(-2, 2);
+      var dx = x + Math.randomBetween(-3, 3);
+      var dy = y + Math.randomBetween(-3, 3);
       this.particles.push(new Particle(dx, dy, Math.PI * this.velocity.dir, 2.0, 'red', 20));
     }
-  }
-
-  random(min, max) {
-    return Math.random() * (max - min) + min;
-  }
-
-  /** @function randomInt()
-    * @param int min is the minimum desire value
-    * @param int max is the maximum desire value
-    */
-  randomInt(min, max) {
-    return Math.floor(Math.random() * (max - min)) + min;
   }
 
   update() {
@@ -99,9 +82,9 @@ export default class Ship {
     ctx.rotate(this.velocity.dir);
     ctx.moveTo(0, -this.radius);
     ctx.lineTo(10, this.radius);
+    ctx.lineTo(0, this.radius / 1.5);
     ctx.lineTo(-10, this.radius);
     ctx.lineTo(0, -this.radius);
-    ctx.closePath();
     ctx.stroke();
     ctx.restore();
     this.particles.forEach(particle => {

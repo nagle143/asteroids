@@ -9,36 +9,55 @@ export default class UFO extends Ship {
     this.radius = 25;
     this.bufferRadius = 50;
     this.color = 'purple';
+    this.lineSegments = [];
+    this.initLineSegments();
+  }
+
+  initLineSegments() {
+    var xi;
+    var xf;
+    var yi;
+    var yf;
+    var numSegments = 6;
+    for(var i = 0; i < numSegments; i++) {
+      var cos = Math.cos(i * Math.PI / 3);
+      var sin = Math.sin(i * Math.PI / 3);
+      xi = cos * this.innerRadius;
+      xf = cos * this.radius;
+      yi = -sin * this.innerRadius;
+      yf = -sin * this.radius;
+      this.lineSegments.push({xI: xi, xF: xf, yI: yi, yF: yf});
+    }
   }
 
   initVelocity() {
     //Sets speed of the asteroids, more mass = slower
-    var mag = 3;
-    this.speed.x = this.random(-mag, mag);
-    this.speed.y = this.random(-mag, mag);
+    var mag = 1;
+    this.speed.x = Math.randomBetween(-mag, mag);
+    this.speed.y = Math.randomBetween(-mag, mag);
   }
 
   initPosition() {
-    var spawnSide = this.randomInt(1, 5);
+    var spawnSide = Math.randomInt(1, 5);
     //Top
     if(spawnSide === 1) {
-      this.x = this.random(-2 * this.radius, 1000 + 2 * this.radius);
+      this.x = Math.randomBetween(-2 * this.radius, 1000 + 2 * this.radius);
       this.y = - 2 * this.radius;
     }
     //Right
     else if(spawnSide === 2) {
       this.x = 1000 + 2 * this.radius;
-      this.y = this.random(-2 * this.radius, 1000 + 2 * this.radius);
+      this.y = Math.randomBetween(-2 * this.radius, 1000 + 2 * this.radius);
     }
     //Bottom
     else if(spawnSide === 3) {
-      this.x = this.random(-2 * this.radius, 1000 + 2 * this.radius);
+      this.x = Math.randomBetween(-2 * this.radius, 1000 + 2 * this.radius);
       this.y = 1000 + 2 * this.radius;
     }
     //Left
     else {
       this.x = - 2 * this.radius;
-      this.y = this.random(-2 * this.radius, 1000 + 2 * this.radius);
+      this.y = Math.randomBetween(-2 * this.radius, 1000 + 2 * this.radius);
     }
     //this.x = 400;
     //this.y = 400;
@@ -83,23 +102,36 @@ export default class UFO extends Ship {
 
   update() {
     this.edgeDetection();
-    this.velocity.dir += 0.01;
+    if(this.speed.x > 0) {
+      this.velocity.dir += 0.01;
+    }
+    else {
+      this.velocity.dir -= 0.01;
+    }
     this.x += this.speed.x;
     this.y += this.speed.y;
   }
 
   render(ctx) {
-    //super.render(ctx);
     ctx.save();
     ctx.strokeStyle = this.color;
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.velocity.dir);
     ctx.beginPath();
-    ctx.arc(this.x, this.y, this.innerRadius, 0, Math.PI * 2);
+    ctx.arc(0, 0, this.innerRadius, 0, Math.PI * 2);
     ctx.closePath();
     ctx.stroke();
     ctx.beginPath();
-    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
     ctx.closePath();
     ctx.stroke();
+    ctx.beginPath();
+    this.lineSegments.forEach(segment => {
+      ctx.beginPath();
+      ctx.moveTo(segment.xI, segment.yI);
+      ctx.lineTo(segment.xF, segment.yF);
+      ctx.stroke();
+    });
     ctx.restore();
   }
 }
