@@ -5,15 +5,33 @@ import Projectile from './projectile.js';
 import Particle from './particles.js';
 import UFO from './ufo.js';
 
+/** @function Math.randomBetween()
+  * Math prototype function built to easily create ranom floats
+  * @param float min - the lowest number you want
+  * @param float max - the highest number you want (I beleive it is non-inclusive)
+  * @returns random float between the parameters
+  */
 Math.randomBetween = function (min, max) {
   return Math.random() * (max - min) + min;
 };
 
+/** @function Math.randomBetween()
+  * Math prototype function built to easily create ranom integers
+  * @param float min - the lowest number you want
+  * @param float max - the highest number you want (I beleive it is non-inclusive)
+  * @returns random integer between the parameters
+  */
 Math.randomInt = function (min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 };
 
+/** @class Game
+  * Game object that controls the interactions between all other Objects
+  */
 export default class Game {
+  /** @constructor
+    * Game object constructor, no arguement, sets up all the necessities.
+    */
   constructor() {
     this.screenSide = 1000;
     //Num Objects
@@ -46,16 +64,18 @@ export default class Game {
     this.gameOver = false;
     this.paused = false;
 
-
+    //Found this Wav file @ https://freesound.org/people/joshuaempyre/sounds/251461/
     this.theme = new Audio('./theme.wav');
     this.theme.volume = 0.3;
     this.theme.loop = true;
     this.theme.play();
+    //All Wav files below were created with BFXR
     this.over = new Audio('./gameOver.wav');
     this.collisionSound = new Audio('collision.wav');
     this.explosion = new Audio('./Explosion.wav');
     this.shipExplosion = new Audio('./shipExplosion.wav');
     this.laser = new Audio('./laser_shoot.wav');
+    this.ufoLaser = new Audio('./ufoShot.wav');
     this.teleportSound = new Audio('./teleport.wav');
 
     //Input Map
@@ -91,9 +111,14 @@ export default class Game {
     this.interval = setInterval(this.loop, 10);
   }
 
+  /** @function handleKeyDown()
+    * function to handle key presses
+    */
   handleKeyDown(event) {
     event.preventDefault();
+    //Update the keyMap
     this.keyMap[event.keyCode] = true;
+    //Handle the Pause seperately, to control the loop function
     if(event.keyCode === 80) {
       if(this.paused) {
         this.paused = false;
@@ -104,25 +129,36 @@ export default class Game {
     }
   }
 
+  /** @function
+    * function to handle the keys being lifted up
+    */
   handleKeyUp(event) {
     event.preventDefault();
+    //Update the key map
     this.keyMap[event.keyCode] = false;
   }
 
+  /** @function
+    * function to create a Projectile from the player's ship
+    */
   createProjectile() {
-    //15 is the length from center to the top pointed, the 1.2 is so you can't run into your own shot immediately
+    //Get the coordinates of the tip of the ship, The 1.2 is so you can't run into your own shot immediately
     var x = this.ship.x + Math.sin(this.ship.velocity.dir)* this.ship.radius * 1.2;
     var y = this.ship.y - Math.cos(this.ship.velocity.dir)* this.ship.radius * 1.2;
-    this.projectiles.push(new Projectile(x, y, this.ship.velocity.dir, 'green'));
-    this.laser.play();
+    this.projectiles.push(new Projectile(x, y, this.ship.velocity.dir, this.ship.color));
   }
 
-  ufoProjectile() {
-    var dx = this.ufo.x - this.ship.x;
-    var dy = this.ufo.y - this.ship.y;
-    //Draw a line to the player's ship
+  /** @function
+    * function to handle UFO projectiles
+    * @param float tx - is the x position of the target
+    * @param float ty - is the y position of the target
+    */
+  ufoProjectile(tx, ty) {
+    var dx = this.ufo.x - tx;
+    var dy = this.ufo.y - ty;
+    //Draw a line to the target
     var distance = Math.sqrt(dx * dx + dy * dy);
-    //Get the direction to the player's ship
+    //Get the direction to the target
     var direction = Math.acos((dy)/ distance);
     //Mirror the angle for the left hand side
     if(dx > 0) {
@@ -132,19 +168,23 @@ export default class Game {
     var x = this.ufo.x + Math.sin(direction)* this.ufo.radius * 1.2;
     var y = this.ufo.y - Math.cos(direction)* this.ufo.radius * 1.2;
     this.projectiles.push(new Projectile(x, y, direction, 'violet'));
-    this.laser.play();
+    this.ufoLaser.play();
   }
 
+  /** @function
+    * function to create as many asteroids as needed
+    */
   createAsteroids() {
     while(this.asteroids.length < this.numAsteroids) {
       this.addAsteroid(-1.0);
     }
   }
 
-    /** @function addAsteroid()
+  /** @function addAsteroid()
     * Function to add new asteroid to the list while making sure it is not spawned where a object already is
+    * @param float direction - determines the inital direction of the asteroid if it has exploded, -1.0 if spawning in otherwise
     */
-  addAsteroid(exploded) {
+  addAsteroid(direction) {
     //Variables to establish the particle
     var x;
     var y;
@@ -186,17 +226,16 @@ export default class Game {
         }
       });
       if(!collision) {
-        this.asteroids.push(new Asteroid(x, y, mass, exploded));
+        this.asteroids.push(new Asteroid(x, y, mass, direction));
       }
     }
-    //Updates the Amplied variable because it only tracks the current state of the particles
-    this.amplified = 100;
   }
 
-    /** @function rotate()
+  /** @function rotate()
     * Function to change the velocities to make the collisions act like 1-dimensional collisions
     * @param velocity is the x and y velocities of the asteroid
     * @param float angle is the offset needed to adjust for
+    * @returns vector of rotated velocities
     */
   rotate(velocity, angle) {
     const rotatedVelocities = {
@@ -207,7 +246,7 @@ export default class Game {
   }
 
   /** @function particleCollision()
-    * Function to handle particle to particle collisions, I ripped this out of one my side projects
+    * Function to handle asteroid to asteroid collisions (treated like elastic particle collisions), I ripped this out of one my side projects
     * @param asteroid is the first asteroid in question
     * @param asteroid otherAsteroid is the other particle in question
     */
@@ -222,7 +261,7 @@ export default class Game {
     // Prevent accidental overlap of particles
     if (xVelocityDiff * xDist + yVelocityDiff * yDist >= 0) {
 
-        // Grab angle between the two colliding particles
+        // Grab angle between the two colliding asteroids
         var angle = -Math.atan2(otherAsteroid.y - asteroid.y, otherAsteroid.x - asteroid.x);
 
         // Store mass in var for better readability in collision equation
@@ -249,6 +288,11 @@ export default class Game {
     }
   }
 
+  /** @function circleCollision()
+    * function to determine if two circles are overlapping
+    * @param floats x1, y1, r1 - position and radius of the first circle
+    * @param floats x2, y2, r2 - position and radius of the second circle
+    */
   circleCollision(x1, y1, r1, x2, y2, r2) {
     var dx = x1 - x2;
     var dy = y1 - y2;
@@ -260,24 +304,37 @@ export default class Game {
     return false;
   }
 
+  /** @function handleAsteriodExplosion()
+    * function to handles asteroids exploding from a projectile
+    * @param int aID - index of the asteroid to be exploded
+    */
   handleAsteriodExplosion(aID) {
+    //Save the essentials
     var asteroid = this.asteroids[aID];
     var mass = asteroid.mass;
     var x = asteroid.x;
     var y = asteroid.y;
+    //Get rid of the asteroid
     this.asteroids.splice(aID, 1);
     this.explosion.play();
+    //Smaller asteroids are harder to hit, thus more score
+    this.score += Math.floor(100 / mass);
+    //If it isn't too small
     if(mass >= 15) {
       //random number of pieces the asteroid will break into
       var random = Math.randomInt(2, 4);
+      //Update asteroid count
       this.numAsteroids += random - 1;
       mass /= random;
+      //Random direction
       var direction = Math.randomBetween(0, 2 * Math.PI);
+      //Uniform distribution
       var angleChange = 2 * Math.PI / random;
       for(var i = 0; i < random; i++) {
         //Since mass is also the radius
         var newX = x + Math.cos(direction) * mass;
         var newY = y - Math.sin(direction) * mass;
+        //Create new asteroid
         this.asteroids.push(new Asteroid(newX, newY, mass, direction));
         direction += angleChange;
       }
@@ -285,11 +342,14 @@ export default class Game {
     else {
       this.numAsteroids--;
     }
-    //Smaller asteroids are harder to hit, thus more score
-    this.score += Math.floor(100 / mass);
   }
 
-  detectShipCrash(ship ,asteroid) {
+  /** @function detectShipCrash()
+    * determines if a ship hits an asteroid / Handles UFO AI
+    * @param Ship ship - ship object, coulde be player ship or ufo
+    * @param Asteroid asteroid - asteroid object
+    */
+  detectShipCrash(ship, asteroid) {
     var dx = ship.x - asteroid.x;
     var dy = ship.y - asteroid.y;
     var distance = dx * dx + dy * dy;
@@ -297,6 +357,11 @@ export default class Game {
     if(ship.color === 'purple') {
       if(distance < Math.pow(this.ufo.bufferRadius + asteroid.radius, 2)) {
         this.ufo.alterPath(dx, dy);
+        //Check if UFO is on the verge of crashing
+        if (distance < Math.pow(this.ufo.critical + asteroid.radius, 2)) {
+          //Deploy Counter Measures!!
+          this.ufoProjectile(asteroid.x, asteroid.y);
+        }
       }
     }
     if(distance < Math.pow(asteroid.radius + ship.radius, 2)) {
@@ -305,10 +370,14 @@ export default class Game {
     return false;
   }
 
+  /** @function explode()
+    * function to create explosion particle effects
+    * @param floats x, y - position of explosion
+    * @param string color - determines the color of particles to be created
+    */
   explode(x, y, color) {
     var numParticles = Math.randomInt(50, 100);
     var dir = Math.randomBetween(0, Math.PI * 2);
-    //console.log("In explode")
     for(var i = 0; i < numParticles; i ++) {
       if(Math.randomInt(0, 100) > 90) {
         dir = Math.randomBetween(0, Math.PI * 2);
@@ -317,18 +386,25 @@ export default class Game {
     }
   }
 
+  /** @function teleport()
+    * function to handle the teleport extra credit
+    * Checks if the area is clear before chosing a spot
+    */
   teleport() {
+    //Random position
     var x = Math.randomBetween(100, 900);
     var y = Math.randomBetween(100, 900);
     //So you don't spawn right next to something and immediately die
     var buffer = 50;
     var collision = false;
+    //Loop until you find something, potentially opens the door for infinite loop, but extremely unlikely with the small buffer, and everything is constantly moving
     do {
       if(collision) {
         x = Math.randomBetween(100, 900);
         y = Math.randomBetween(100, 900);
         collision = false;
       }
+      //Checks if the ufo is nearby
       if(this.ufo && this.circleCollision(x, y, this.ship.radius, this.ufo.x, this.ufo.y, this.ufo.radius + 2 * buffer)) {
         collision = true;
       }
@@ -345,15 +421,20 @@ export default class Game {
         }
       });
     } while(collision);
+    //Particle explosion in the to & from spots
     this.explode(this.ship.x, this.ship.y, this.ship.color);
     this.explode(x, y, this.ship.color);
     this.teleportSound.play();
     this.ship.x = x;
     this.ship.y = y;
+    //Resets you ships momentum
     this.ship.speed.x = 0.0;
     this.ship.speed.y = 0.0;
   }
 
+  /** @function respawn()
+    * function to handle the player's ship getting destroyed
+    */
   respawn() {
     this.respawning = true;
     this.lives--;
@@ -368,12 +449,18 @@ export default class Game {
     }
   }
 
+  /** @function destoryUFO()
+    * handles the ufo getting destroyed;
+    */
   destoryUFO() {
     this.ufo = null;
     this.score += 100;
     this.shipExplosion.play();
   }
 
+  /** @function drawHUD()
+    * function to draw the HUD at the bottom of the screen
+    */
   drawHUD() {
     this.HUDcontext.fillStyle = 'black';
     this.HUDcontext.strokeStyle = 'blue';
@@ -389,6 +476,9 @@ export default class Game {
     this.HUDcontext.strokeText("W: Thurster  A: Rotate Left  D: Rotate Right  Space: Shoot  F: Teleport  P: Pause  (Arrows also Work)", 150, 75);
   }
 
+  /** @function update()
+    * Handles updating all object and variables, comments laced throughout
+    */
   update() {
     //Update Ship
     this.ship.update();
@@ -406,6 +496,7 @@ export default class Game {
       this.level++;
       //You Will Probably Need These
       this.lives += this.level;
+      this.teleports += this.level;
       this.numAsteroids = 10 + 2 * this.level;
       this.createAsteroids();
     }
@@ -502,6 +593,7 @@ export default class Game {
         this.explode(this.projectiles[i].x, this.projectiles[i].y, this.projectiles[i].color);
         this.projectiles.splice(i, 1);
         this.destoryUFO();
+        this.shipExplosion.play();
         break;
       }
     }
@@ -531,6 +623,7 @@ export default class Game {
     //Space
     if(this.keyMap[32] && this.rateOfFire === 50 && !this.respawning) {
       this.createProjectile();
+      this.laser.play();
       this.reloading = true;
     }
     //F
@@ -552,7 +645,7 @@ export default class Game {
     if(this.ufo) {
       this.ufoRateOfFire--;
       if(this.ufoRateOfFire <= 0) {
-        this.ufoProjectile();
+        this.ufoProjectile(this.ship.x, this.ship.y);
         this.ufoRateOfFire = Math.randomInt(150, 350);
       }
     }
@@ -580,6 +673,10 @@ export default class Game {
       }
     }
   }
+
+  /** @function render()
+    * standard render function, calls all other render funcitons and drawHUD
+    */
   render() {
     //Initial Setup
     this.backBufferContext.fillStyle = 'black';
@@ -618,6 +715,10 @@ export default class Game {
     //Bit blit the back buffer onto the screen
     this.screenBufferContext.drawImage(this.backBufferCanvas, 0, 0);
   }
+
+  /** @function loop()
+    * continuously loops the update and render function unless gameOver or paused
+    */
   loop() {
     if(!this.paused && !this.gameOver) {
       this.update();

@@ -7,7 +7,8 @@ export default class UFO extends Ship {
     this.initVelocity();
     this.innerRadius = 10;
     this.radius = 25;
-    this.bufferRadius = 50;
+    this.bufferRadius = 60;
+    this.critical = 40;
     this.color = 'purple';
     this.lineSegments = [];
     this.initLineSegments();
@@ -32,7 +33,7 @@ export default class UFO extends Ship {
 
   initVelocity() {
     //Sets speed of the asteroids, more mass = slower
-    var mag = 1;
+    var mag = Math.randomBetween(1, 2);
     this.speed.x = Math.randomBetween(-mag, mag);
     this.speed.y = Math.randomBetween(-mag, mag);
   }
@@ -59,8 +60,6 @@ export default class UFO extends Ship {
       this.x = - 2 * this.radius;
       this.y = Math.randomBetween(-2 * this.radius, 1000 + 2 * this.radius);
     }
-    //this.x = 400;
-    //this.y = 400;
   }
 
   /** @function edgeDetection()

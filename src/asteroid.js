@@ -25,8 +25,7 @@ export default class Asteroid {
 
   initVelocity() {
     //Sets speed of the asteroids, more mass = slower
-    var mag = 12 / this.mass;
-    //Keeps the huge asteroids from moving too slow
+    var mag = Math.randomInt(9, 12) / this.mass;
     this.velocity.x = Math.randomBetween(-mag, mag);
     this.velocity.y = Math.randomBetween(-mag, mag);
   }
@@ -50,7 +49,7 @@ export default class Asteroid {
 
   explodedVelocity() {
     //Sets speed of the asteroids, more mass = slower
-    var mag = 8 / this.mass;
+    var mag = Math.randomInt(7, 10) / this.mass;
     //Uses the direction given to ensure the asteroids leave the center of the original asteroid
     this.velocity.x = Math.cos(this.direction) * mag;
     this.velocity.y = -Math.sin(this.direction) * mag;
@@ -75,16 +74,16 @@ export default class Asteroid {
     */
   edgeDetection() {
     if(this.x >= 1000 + 2.5 * this.radius) {
-      this.x = -2 * this.radius;
+      this.x = -2.4 * this.radius;
     }
     else if(this.x <= -2.5 * this.radius) {
-      this.x = 1000 + 2 * this.radius;
+      this.x = 1000 + 2.4 * this.radius;
     }
     if(this.y >= 1000 + 2.5 * this.radius) {
-      this.y = -2 * this.radius;
+      this.y = -2.4 * this.radius;
     }
     else if(this.y <= -2.5 * this.radius) {
-      this.y = 1000 + 2 * this.radius;
+      this.y = 1000 + 2.4 * this.radius;
     }
   }
 
