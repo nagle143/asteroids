@@ -55,13 +55,14 @@ export default class Game {
     this.particles = [];
     //HUD Variables
     this.score = 0;
+    this.highscore = 0;
     this.lives = 3;
     this.level = 1;
     //controls the telepor function
     this.teleports = 10;
     this.coolingDown = 50;
     //Over Loop Controllers
-    this.gameOver = false;
+    this.gameOver = false;;
     this.paused = false;
 
     //Found this Wav file @ https://freesound.org/people/joshuaempyre/sounds/251461/
@@ -111,6 +112,36 @@ export default class Game {
     this.interval = setInterval(this.loop, 10);
   }
 
+  masterReset() {
+    //Objects/Arrays
+    this.ship = new Ship();
+    this.ufo = null;
+    //Variables to control ufo spawn
+    this.ufoTimer = Math.randomInt(1000, 2000);
+    //var To control ufo firing
+    this.ufoRateOfFire = Math.randomInt(150, 350);
+    //Vars to help with respawning the player
+    this.respawning = false;
+    this.respawnTimer = 300;
+    this.projectiles = [];
+    //Vars to help control player projectiles
+    this.rateOfFire = 50;
+    this.reloading = false;
+    this.asteroids = [];
+    this.createAsteroids();
+    this.particles = [];
+    //HUD Variables
+    this.score = 0;
+    this.lives = 3;
+    this.level = 1;
+    //controls the telepor function
+    this.teleports = 10;
+    this.coolingDown = 50;
+    //Over Loop Controllers
+    this.gameOver = false;
+    this.paused = false;
+  }
+
   /** @function handleKeyDown()
     * function to handle key presses
     */
@@ -126,6 +157,9 @@ export default class Game {
       else {
         this.paused = true;
       }
+    }
+    if(event.keyCode === 192) {
+      this.masterReset();
     }
   }
 
@@ -458,6 +492,12 @@ export default class Game {
     this.shipExplosion.play();
   }
 
+  checkHighScore() {
+    if(this.score > this.highscore) {
+      this.highscore = this.score;
+    }
+  }
+
   /** @function drawHUD()
     * function to draw the HUD at the bottom of the screen
     */
@@ -470,10 +510,10 @@ export default class Game {
     this.HUDcontext.strokeText("LEVEL: " + this.level, 400, 50);
     this.HUDcontext.strokeText("SCORE: " + this.score, 800, 50);
     this.HUDcontext.strokeText("TELEPORTS: " + this.teleports, 550, 50);
-    this.HUDcontext.strokeText("ASTEROIDS: " + this.numAsteroids , 150, 50);
+    this.HUDcontext.strokeText("HIGHSCORE: " + this.highscore , 150, 50);
     this.HUDcontext.font = '20px Times New Roman';
     this.HUDcontext.strokeText("CONTROLS: ", 10, 75);
-    this.HUDcontext.strokeText("W: Thurster  A: Rotate Left  D: Rotate Right  Space: Shoot  F: Teleport  P: Pause  (Arrows also Work)", 150, 75);
+    this.HUDcontext.strokeText("W: Thurster  A: Rotate Left  D: Rotate Right  Space: Shoot  F: Teleport  P: Pause  ~: Reset", 150, 75);
   }
 
   /** @function update()
@@ -672,6 +712,9 @@ export default class Game {
         this.particles.splice(j, 1);
       }
     }
+
+    //Update highscore
+    this.checkHighScore();
   }
 
   /** @function render()
@@ -727,6 +770,7 @@ export default class Game {
     if(this.gameOver) {
       this.screenBufferContext.font = "50px Times New Roman";
       this.screenBufferContext.strokeText("GAME OVER", 350, 500);
+      this.screenBufferContext.strokeText("Retry? Press ~", 360, 600);
     }
     if(this.paused) {
       this.screenBufferContext.font = "50px Times New Roman";
