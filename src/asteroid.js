@@ -1,6 +1,14 @@
 
-
+/** @class Asteroid
+  * Class that handles the construction and data of an Asteroid
+  */
 export default class Asteroid {
+  /** @constructor
+    * Initializes all the properties of the asteroid
+    * @param floats x, y - position of te asteroid to be created
+    * @param float mass - mass of the asteroid, also the radius, mass to radius ratio 1:1
+    * @param float direction - direction in radians of the asteroid's speed, -1.0 if the asteroid is being created from scratch
+    */
   constructor(x, y, mass, direction) {
     this.x = x;
     this.y = y;
@@ -15,6 +23,7 @@ export default class Asteroid {
     this.direction = direction;
     this.velocity = {x: 0.0, y: 0.0};
     this.angle = 0.0;
+    //direction is not -1 if the asteroid has exploded
     if(this.direction === -1.0) {
       this.initVelocity();
     }
@@ -23,6 +32,9 @@ export default class Asteroid {
     }
   }
 
+  /** @function initVelocity()
+    * function to initalize the velocity of the asteroid from scratch
+    */
   initVelocity() {
     //Sets speed of the asteroids, more mass = slower
     var mag = Math.randomInt(9, 12) / this.mass;
@@ -30,6 +42,9 @@ export default class Asteroid {
     this.velocity.y = Math.randomBetween(-mag, mag);
   }
 
+  /** @function createSurface()
+    * function to create some 'noise' on the asteroid's surface
+    */
   createSurface() {
     var segments = 24;
     //15 degree increments
@@ -47,6 +62,9 @@ export default class Asteroid {
     }
   }
 
+  /** @function explodedVelocity()
+    * function to initalize velocities from asteroids that have spawned from an Explosion
+    */
   explodedVelocity() {
     //Sets speed of the asteroids, more mass = slower
     var mag = Math.randomInt(7, 10) / this.mass;
@@ -87,6 +105,9 @@ export default class Asteroid {
     }
   }
 
+  /** @function update()
+    * handles the updating of asteroids speed and position
+    */
   update() {
     this.edgeDetection();
     if(this.velocity.x > 0) {
@@ -99,17 +120,21 @@ export default class Asteroid {
     this.y += this.velocity.y;
   }
 
+  /** @function render()
+    * function that handles drawing the asteroids
+    * @param context context - backBufferContext from game.js
+    */
   render(context) {
     context.save();
     context.strokeStyle = 'white';
     context.translate(this.x, this.y);
     context.rotate(this.angle);
     context.beginPath();
+    //Draw the noisy surface
     context.moveTo(this.surfacePath[0].x,this.surfacePath[0].y);
     for(var i = 1; i < this.surfacePath.length; i++) {
       context.lineTo(this.surfacePath[i].x, this.surfacePath[i].y);
     }
-    //context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     context.closePath();
     context.stroke();
     context.restore();

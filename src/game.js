@@ -109,9 +109,13 @@ export default class Game {
     window.onkeydown = this.handleKeyDown;
     window.onkeyup = this.handleKeyUp;
 
+    //100 fps
     this.interval = setInterval(this.loop, 10);
   }
 
+  /** @function masterReset()
+    * This function handles the reset of eve except for the highscore, ~ to activate
+    */
   masterReset() {
     //Objects/Arrays
     this.ship = new Ship();
@@ -140,6 +144,8 @@ export default class Game {
     //Over Loop Controllers
     this.gameOver = false;
     this.paused = false;
+    this.theme.loop = true;
+    this.theme.play();
   }
 
   /** @function handleKeyDown()
@@ -547,6 +553,11 @@ export default class Game {
       if(this.ufoTimer <= 0) {
         //Spawn UFO and reset Timer
         this.ufo = new UFO();
+        this.asteroids.forEach(asteroid => {
+          if(this.circleCollision(asteroid.x, asteroid.y, asteroid.radius + 50, this.ufo.x, this.ufo.y, this.ufo.radius)) {
+            this.ufo = new UFO();
+          }
+        });
         this.ufoTimer = Math.randomInt(500, 1000);
       }
     }

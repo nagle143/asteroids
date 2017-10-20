@@ -1,36 +1,57 @@
 import Ship from './ship.js';
 
+/** @class UFO
+  * Class to handle the UFO, inherits from the Ship class
+  */
 export default class UFO extends Ship {
+  /** @constructor
+    * Handles the initialization of the UFO
+    */
   constructor() {
     super();
     this.initPosition();
     this.initVelocity();
+    //For visual
     this.innerRadius = 10;
+    //For the actual size of the ship
     this.radius = 25;
+    //For the area around the ship the UFO tries to keep empty
     this.bufferRadius = 60;
+    //When the Ship is on the verge of crashing into an asteroid, it shoots to destory it
     this.critical = 40;
     this.color = 'purple';
+    //For visual
     this.lineSegments = [];
     this.initLineSegments();
   }
 
+  /** @function initLineSegments()
+    * handles the creation of endpoints to draw lines on the UFO
+    */
   initLineSegments() {
     var xi;
     var xf;
     var yi;
     var yf;
+    // 60 degress per segment, (PI / 3)
     var numSegments = 6;
     for(var i = 0; i < numSegments; i++) {
+      //Calculate various sin and cos values
       var cos = Math.cos(i * Math.PI / 3);
       var sin = Math.sin(i * Math.PI / 3);
+      //Set x values based on cos * radius values
       xi = cos * this.innerRadius;
       xf = cos * this.radius;
+      //Set y values based on - sin * radius values
       yi = -sin * this.innerRadius;
       yf = -sin * this.radius;
       this.lineSegments.push({xI: xi, xF: xf, yI: yi, yF: yf});
     }
   }
 
+  /** @function initVelocity()
+    * Handles the initVelocity of the UFO
+    */
   initVelocity() {
     //Sets speed of the asteroids, more mass = slower
     var mag = Math.randomBetween(1, 2);
@@ -38,6 +59,9 @@ export default class UFO extends Ship {
     this.speed.y = Math.randomBetween(-mag, mag);
   }
 
+  /** @function initPosition()
+    * Handles the initial position of the UFO
+    */
   initPosition() {
     var spawnSide = Math.randomInt(1, 5);
     //Top
@@ -63,7 +87,8 @@ export default class UFO extends Ship {
   }
 
   /** @function edgeDetection()
-    * function to handle the asteroid leaving the edge of the screen
+    * function to handle the asteroid leaving the edge of the screen,  slightly different than player ship since it is okay for it to be off screen
+    * Side note - UFO is much more vulnerable to asteroids off screen, cannot shoot to protect itself (though it will try) and asteroids switching sides may instantly destory it
     */
   edgeDetection() {
     if(this.x >= 1000 + 2.5 * this.radius) {
@@ -80,6 +105,12 @@ export default class UFO extends Ship {
     }
   }
 
+  /** @function alterPath()
+    * function to determine UFO dodging asteroids using the bufferRadius
+    * @param floats dx, dy - change in position between the UFO and asteroid, called from detectShipCrash from game.js
+    * Notes - Pretty simple avoidance AI, pretty much draws a box around the UFO. Updates the speed to oppisite the side of the asteroid.
+    * Not perfect by any means, but good enough to keep it alive surpisingly long even before I gave the UFO the ability to target asteroids
+    */
   alterPath(dx, dy) {
     if(dx < 0 && dy < 0) {
       this.speed.x = -1.0;
@@ -99,6 +130,9 @@ export default class UFO extends Ship {
     }
   }
 
+  /** @function update()
+    * standard position / speed update function
+    */
   update() {
     this.edgeDetection();
     if(this.speed.x > 0) {
@@ -111,6 +145,9 @@ export default class UFO extends Ship {
     this.y += this.speed.y;
   }
 
+ /** @function render()
+  * standard render function
+  */
   render(ctx) {
     ctx.save();
     ctx.strokeStyle = this.color;

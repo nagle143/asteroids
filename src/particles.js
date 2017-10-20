@@ -1,5 +1,16 @@
 
+/** @class Particle
+  * class to handle a particle's life
+  */
 export default class Particle {
+  /** @constructor
+    * initialization of a particle
+    * @param floats x,y - position of the particle
+    * @param float direction - direction the particle will travel
+    * @param int speed - velocity of the particle
+    * @param string color - color of the particle
+    * @param int life - how many iterations the particle will last for
+    */
   constructor(x, y, direction, speed, color, life) {
     this.startX = x;
     this.startY = y;
@@ -12,10 +23,10 @@ export default class Particle {
     this.speedY = -Math.sin(direction) * this.speed;
     this.decayDistance = Math.randomBetween(10, 50);
   }
+  /** @function update()
+    * function to updates the particle if it hasn't hit the decay distance
+    */
   update() {
-    //random distance to determine if the particles updates or not
-    //Honestly, no idea why it works, but it does
-
     var dx = this.startX - this.x;
     var dy = this.startY - this.y;
     this.life--;
@@ -25,6 +36,9 @@ export default class Particle {
     this.x += this.speedX;
     this.y += this.speedY;
   }
+  /** @function render()
+    * standard render function
+    */
   render(ctx) {
     ctx.save()
     ctx.fillStyle = this.color;
