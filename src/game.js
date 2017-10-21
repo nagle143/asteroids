@@ -338,7 +338,7 @@ export default class Game {
     var dy = y1 - y2;
     var distance = dx * dx + dy * dy;
     //check if ufo
-    if(distance < Math.pow(r1 + r2, 2)) {
+    if(distance < (r1 + r2) * (r1 + r2)) {
       return true;
     }
     return false;
@@ -574,13 +574,13 @@ export default class Game {
 
     //Checks for collisions between asteroids
     for(var i = 0; i < this.asteroids.length; i++) {
-      for(var j = 0; j < this.asteroids.length; j++) {
-        if(i !== j) {
+      for(var j = i + 1; j < this.asteroids.length; j++) {
+        //if(i !== j) {
           if(this.asteroids[i].collisionDetection(this.asteroids[j].x, this.asteroids[j].y, this.asteroids[j].radius)) {
             this.particleCollision(this.asteroids[i], this.asteroids[j]);
             this.collisionSound.play();
           }
-        }
+        //}
       }
     }
 
@@ -599,24 +599,17 @@ export default class Game {
 
     if(!this.respawning) {
       //Check for ship crashing
-      for(var i = 0; i < this.asteroids.length; i++) {
-        if(this.detectShipCrash(this.ship, this.asteroids[i])) {
+      this.asteroids.forEach(asteroid => {
+        if(this.detectShipCrash(this.ship, asteroid)) {
           this.explode(this.ship.x, this.ship.y, this.ship.color);
           this.shipExplosion.play();
           this.respawn();
         }
-      }
-    }
-
-    //Detect UFO crashing/allow it to dodge asteroids, if applicable
-    if(this.ufo) {
-      for(var i = 0; i < this.asteroids.length; i++) {
-        if(this.detectShipCrash(this.ufo, this.asteroids[i])) {
+        if(this.ufo && this.detectShipCrash(this.ufo, asteroid)) {
           this.explode(this.ufo.x, this.ufo.y, this.ufo.color);
           this.destoryUFO();
-          break;
         }
-      }
+      });
     }
 
     //Ship to UFO collision

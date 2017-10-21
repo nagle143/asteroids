@@ -80,7 +80,13 @@ export default class Asteroid {
     * @param int aradius is the radius of the asteroid being checked against this
     */
   collisionDetection(ax, ay, aradius) {
-    var distance = Math.pow(this.x - ax, 2) + Math.pow(this.y - ay, 2);
+    var dx = this.x - ax;
+    var dy = this.y - ay;
+    //Quick test to save some computation
+    if(Math.abs(dx) > this.radius + aradius || Math.abs(dy) > this.radius + aradius) {
+      return false;
+    }
+    var distance = dx * dx + dy * dy;
     if(distance < Math.pow(this.radius + aradius, 2)) {
       return true;
     }
