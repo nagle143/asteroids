@@ -19,10 +19,41 @@ export default class UFO extends Ship {
     this.bufferRadius = 60;
     //When the Ship is on the verge of crashing into an asteroid, it shoots to destory it
     this.critical = 40;
-    this.color = 'purple';
+    this.color;
+    this.setColor();
+    this.rateOfFire = 0;
+    this.setRateOfFire();
     //For visual
     this.lineSegments = [];
     this.initLineSegments();
+  }
+
+  setColor() {
+    var color;
+    var random = Math.randomInt(0, 101);
+    //Spawn UFO and reset Timer
+    if(random > 90) {
+      color = 'purple';
+    }
+    else if (random > 60) {
+      color = 'blue';
+    }
+    else {
+      color = 'orange';
+    }
+    this.color = color;
+  }
+
+  setRateOfFire() {
+    if(this.color === 'purple') {
+      this.rateOfFire = Math.randomInt(150, 350);
+    }
+    else if(this.color === 'blue') {
+      this.rateOfFire = Math.randomInt(300, 700);
+    }
+    else {
+      this.rateOfFire = Math.randomInt(500, 1000);
+    }
   }
 
   /** @function initLineSegments()
@@ -91,17 +122,11 @@ export default class UFO extends Ship {
     * Side note - UFO is much more vulnerable to asteroids off screen, cannot shoot to protect itself (though it will try) and asteroids switching sides may instantly destory it
     */
   edgeDetection() {
-    if(this.x >= 1000 + 2.5 * this.radius) {
-      this.x = -2 * this.radius;
+    if((this.x + this.bufferRadius >= 1000 && this.speed.x > 0) || (this.x - this.bufferRadius <= 0 && this.speed.x < 0)) {
+      this.speed.x = -this.speed.x;
     }
-    else if(this.x <= -2.5 * this.radius) {
-      this.x = 1000 + 2 * this.radius;
-    }
-    if(this.y >= 1000 + 2.5 * this.radius) {
-      this.y = -2 * this.radius;
-    }
-    else if(this.y <= -2.5 * this.radius) {
-      this.y = 1000 + 2 * this.radius;
+    if((this.y + this.bufferRadius >= 1000 && this.speed.y > 0) || (this.y - this.bufferRadius <= 0 && this.speed.y < 0)) {
+      this.speed.y = -this.speed.y;
     }
   }
 
@@ -128,6 +153,10 @@ export default class UFO extends Ship {
       this.speed.x = -1.0;
       this.speed.y = 1.0;
     }
+  }
+
+  avoidProjectile(x, y, direction) {
+
   }
 
   /** @function update()
