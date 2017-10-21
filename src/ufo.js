@@ -7,9 +7,10 @@ export default class UFO extends Ship {
   /** @constructor
     * Handles the initialization of the UFO
     */
-  constructor() {
+  constructor(x, y) {
     super();
-    this.initPosition();
+    this.x = x;
+    this.y = y;
     this.initVelocity();
     //For visual
     this.innerRadius = 10;
@@ -20,6 +21,7 @@ export default class UFO extends Ship {
     //When the Ship is on the verge of crashing into an asteroid, it shoots to destory it
     this.critical = 40;
     this.color;
+    this.bounty;
     this.setColor();
     this.rateOfFire = 0;
     this.setRateOfFire();
@@ -32,14 +34,17 @@ export default class UFO extends Ship {
     var color;
     var random = Math.randomInt(0, 101);
     //Spawn UFO and reset Timer
-    if(random > 90) {
+    if(random > 80) {
       color = 'purple';
+      this.bounty = 200;
     }
-    else if (random > 60) {
+    else if (random > 50) {
       color = 'blue';
+      this.bounty = 150;
     }
     else {
       color = 'orange';
+      this.bounty = 100;
     }
     this.color = color;
   }
@@ -85,7 +90,7 @@ export default class UFO extends Ship {
     */
   initVelocity() {
     //Sets speed of the asteroids, more mass = slower
-    var mag = Math.randomBetween(1, 2);
+    var mag = Math.randomBetween(2, 3);
     this.speed.x = Math.randomBetween(-mag, mag);
     this.speed.y = Math.randomBetween(-mag, mag);
   }
@@ -138,20 +143,20 @@ export default class UFO extends Ship {
     */
   alterPath(dx, dy) {
     if(dx < 0 && dy < 0) {
-      this.speed.x = -1.0;
-      this.speed.y = -1.0;
+      this.speed.x = Math.randomBetween(-2, -1);
+      this.speed.y = Math.randomBetween(-2, -1);
     }
     else if (dx > 0 && dy > 0) {
-      this.speed.x = 1.0;
-      this.speed.y = 1.0;
+      this.speed.x = Math.randomBetween(1, 2);
+      this.speed.y = Math.randomBetween(1, 2);
     }
     else if (dx > 0 && dy < 0) {
-      this.speed.x = 1.0;
-      this.speed.y = -1.0;
+      this.speed.x = Math.randomBetween(1, 2);
+      this.speed.y = Math.randomBetween(-2, -1);
     }
     else {
-      this.speed.x = -1.0;
-      this.speed.y = 1.0;
+      this.speed.x = Math.randomBetween(-2, -1);
+      this.speed.y = Math.randomBetween(1, 2);
     }
   }
 

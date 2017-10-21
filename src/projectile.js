@@ -9,7 +9,7 @@ export default class Projectile {
     this.y = y;
     this.radius = 3.5;
     this.color = color;
-    this.velocity = {mag: 4.0, dir: direction};
+    this.velocity = {mag: 5.0, dir: direction};
     this.speed = {x: 0.0, y: 0.0};
     this.initSpeed();
     //Particle trail of the projectile

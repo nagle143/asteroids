@@ -37,9 +37,25 @@ export default class Asteroid {
     */
   initVelocity() {
     //Sets speed of the asteroids, more mass = slower
-    var mag = Math.randomInt(9, 12) / this.mass;
-    this.velocity.x = Math.randomBetween(-mag, mag);
-    this.velocity.y = Math.randomBetween(-mag, mag);
+    var mag = Math.randomInt(8, 10) / this.mass;
+    if(this.x < 0) {
+      this.velocity.x = Math.randomBetween(1.0, mag);
+    }
+    else if(this.x > 1000 + this.radius){
+      this.velocity.x = -Math.randomBetween(1.0, mag);
+    }
+    else {
+      this.velocity.x = Math.randomBetween(-mag, mag);
+    }
+    if(this.y < 0) {
+      this.velocity.y = Math.randomBetween(1.0, mag);
+    }
+    else  if(this.y > 1000 + this.radius){
+      this.velocity.y = -Math.randomBetween(1.0, mag);
+    }
+    else {
+      this.velocity.y = Math.randomBetween(-mag, mag);
+    }
   }
 
   /** @function createSurface()
@@ -67,7 +83,7 @@ export default class Asteroid {
     */
   explodedVelocity() {
     //Sets speed of the asteroids, more mass = slower
-    var mag = Math.randomInt(7, 10) / this.mass;
+    var mag = Math.randomInt(9, 12) / this.mass;
     //Uses the direction given to ensure the asteroids leave the center of the original asteroid
     this.velocity.x = Math.cos(this.direction) * mag;
     this.velocity.y = -Math.sin(this.direction) * mag;

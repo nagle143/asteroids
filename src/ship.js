@@ -29,21 +29,21 @@ export default class Ship {
     this.speed.y += -Math.cos(this.velocity.dir) * this.velocity.mag;
     this.speed.x += Math.sin(this.velocity.dir) * this.velocity.mag;
     //Enforce the mass x speed
-    if(Math.abs(this.speed.x) >= 2.0) {
+    if(Math.abs(this.speed.x) >= 3.0) {
       if(this.speed.x < 0) {
-        this.speed.x = -2.0;
+        this.speed.x = -3.0;
       }
       else {
-        this.speed.x = 2.0;
+        this.speed.x = 3.0;
       }
     }
     //Enfore the max y speed
-    if(Math.abs(this.speed.y) >= 2.0) {
+    if(Math.abs(this.speed.y) >= 3.0) {
       if(this.speed.y < 0) {
-        this.speed.y = -2.0;
+        this.speed.y = -3.0;
       }
       else {
-        this.speed.y = 2.0;
+        this.speed.y = 3.0;
       }
     }
   }
